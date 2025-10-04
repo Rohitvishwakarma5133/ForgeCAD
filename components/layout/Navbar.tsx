@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Zap } from 'lucide-react';
 import { NAVIGATION_ITEMS, COMPANY_NAME } from '@/lib/constants';
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,9 +44,20 @@ export default function Navbar() {
             <Link href="/demo">
               <Button variant="outline">Try Demo</Button>
             </Link>
-            <Link href="/dashboard">
-              <Button>Dashboard</Button>
-            </Link>
+            <SignedOut>
+              <SignInButton>
+                <Button variant="outline">Sign In</Button>
+              </SignInButton>
+              <SignUpButton>
+                <Button>Sign Up</Button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/dashboard">
+                <Button variant="outline">Dashboard</Button>
+              </Link>
+              <UserButton />
+            </SignedIn>
           </div>
 
           {/* Mobile menu button */}
@@ -85,9 +97,24 @@ export default function Navbar() {
                     Try Demo
                   </Button>
                 </Link>
-                <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full">Dashboard</Button>
-                </Link>
+                <SignedOut>
+                  <SignInButton>
+                    <Button variant="outline" className="w-full">
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <Button className="w-full">Sign Up</Button>
+                  </SignUpButton>
+                </SignedOut>
+                <SignedIn>
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">Dashboard</Button>
+                  </Link>
+                  <div className="px-3 py-2">
+                    <UserButton />
+                  </div>
+                </SignedIn>
               </div>
             </div>
           </div>
