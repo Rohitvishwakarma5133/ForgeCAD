@@ -1,0 +1,814 @@
+{
+  "image_path": "sample_engineering_text.png",
+  "analysis_timestamp": "2025-10-04T05:55:17.050488",
+  "methods_used": [
+    "tesseract",
+    "trocr",
+    "yolo"
+  ],
+  "results": {
+    "tesseract": {
+      "original_image": "sample_engineering_text.png",
+      "preprocessed_image": "sample_engineering_text_preprocessed.png",
+      "extracted_text": "Sample Engineering Drawing\nDimensions: 150mm x 75mm\nMaterial: Steel Grade A",
+      "bounding_boxes": [
+        {
+          "text": "Sample",
+          "bbox": [
+            20,
+            34,
+            100,
+            57
+          ],
+          "confidence": 96
+        },
+        {
+          "text": "Engineering",
+          "bbox": [
+            113,
+            33,
+            235,
+            57
+          ],
+          "confidence": 96
+        },
+        {
+          "text": "Drawing",
+          "bbox": [
+            249,
+            33,
+            331,
+            57
+          ],
+          "confidence": 96
+        },
+        {
+          "text": "Dimensions:",
+          "bbox": [
+            21,
+            86,
+            131,
+            102
+          ],
+          "confidence": 96
+        },
+        {
+          "text": "150mm",
+          "bbox": [
+            144,
+            86,
+            213,
+            102
+          ],
+          "confidence": 94
+        },
+        {
+          "text": "x",
+          "bbox": [
+            224,
+            91,
+            233,
+            102
+          ],
+          "confidence": 94
+        },
+        {
+          "text": "75mm",
+          "bbox": [
+            243,
+            86,
+            302,
+            102
+          ],
+          "confidence": 83
+        },
+        {
+          "text": "Material:",
+          "bbox": [
+            21,
+            136,
+            98,
+            152
+          ],
+          "confidence": 95
+        },
+        {
+          "text": "Steel",
+          "bbox": [
+            109,
+            136,
+            153,
+            152
+          ],
+          "confidence": 96
+        },
+        {
+          "text": "Grade",
+          "bbox": [
+            164,
+            136,
+            218,
+            152
+          ],
+          "confidence": 96
+        },
+        {
+          "text": "A",
+          "bbox": [
+            227,
+            136,
+            239,
+            152
+          ],
+          "confidence": 96
+        }
+      ],
+      "total_detections": 11
+    },
+    "trocr": {
+      "text": "0-",
+      "confidence": "N/A",
+      "method": "TrOCR"
+    },
+    "yolo": {
+      "yolo": {
+        "total_detections": 0,
+        "detections": [],
+        "image_shape": [
+          200,
+          400
+        ]
+      },
+      "shapes": {
+        "total_shapes": 15,
+        "shapes": [
+          {
+            "shape_type": "polygon",
+            "vertices": 6,
+            "bbox": [
+              177,
+              141,
+              195,
+              152
+            ],
+            "area": 116.0,
+            "aspect_ratio": 1.6363636363636365,
+            "centroid": [
+              186,
+              146
+            ]
+          },
+          {
+            "shape_type": "circle",
+            "vertices": 5,
+            "bbox": [
+              166,
+              86,
+              177,
+              102
+            ],
+            "area": 133.5,
+            "aspect_ratio": 0.6875,
+            "centroid": [
+              171,
+              94
+            ]
+          },
+          {
+            "shape_type": "circle",
+            "vertices": 5,
+            "bbox": [
+              21,
+              86,
+              33,
+              102
+            ],
+            "area": 151.0,
+            "aspect_ratio": 0.75,
+            "centroid": [
+              27,
+              94
+            ]
+          },
+          {
+            "shape_type": "rectangle",
+            "vertices": 4,
+            "bbox": [
+              320,
+              39,
+              332,
+              57
+            ],
+            "area": 166.0,
+            "aspect_ratio": 0.6666666666666666,
+            "centroid": [
+              326,
+              48
+            ]
+          },
+          {
+            "shape_type": "rectangle",
+            "vertices": 4,
+            "bbox": [
+              224,
+              39,
+              236,
+              57
+            ],
+            "area": 165.0,
+            "aspect_ratio": 0.6666666666666666,
+            "centroid": [
+              230,
+              48
+            ]
+          },
+          {
+            "shape_type": "polygon",
+            "vertices": 8,
+            "bbox": [
+              171,
+              39,
+              196,
+              53
+            ],
+            "area": 216.0,
+            "aspect_ratio": 1.7857142857142858,
+            "centroid": [
+              183,
+              46
+            ]
+          },
+          {
+            "shape_type": "rectangle",
+            "vertices": 4,
+            "bbox": [
+              139,
+              39,
+              150,
+              58
+            ],
+            "area": 155.0,
+            "aspect_ratio": 0.5789473684210527,
+            "centroid": [
+              144,
+              48
+            ]
+          },
+          {
+            "shape_type": "circle",
+            "vertices": 6,
+            "bbox": [
+              88,
+              39,
+              100,
+              52
+            ],
+            "area": 117.5,
+            "aspect_ratio": 0.9230769230769231,
+            "centroid": [
+              94,
+              45
+            ]
+          },
+          {
+            "shape_type": "polygon",
+            "vertices": 7,
+            "bbox": [
+              48,
+              39,
+              67,
+              52
+            ],
+            "area": 136.5,
+            "aspect_ratio": 1.4615384615384615,
+            "centroid": [
+              57,
+              45
+            ]
+          },
+          {
+            "shape_type": "circle",
+            "vertices": 5,
+            "bbox": [
+              35,
+              39,
+              46,
+              52
+            ],
+            "area": 114.0,
+            "aspect_ratio": 0.8461538461538461,
+            "centroid": [
+              40,
+              45
+            ]
+          },
+          {
+            "shape_type": "polygon",
+            "vertices": 6,
+            "bbox": [
+              263,
+              38,
+              285,
+              52
+            ],
+            "area": 129.5,
+            "aspect_ratio": 1.5714285714285714,
+            "centroid": [
+              274,
+              45
+            ]
+          },
+          {
+            "shape_type": "rectangle",
+            "vertices": 4,
+            "bbox": [
+              69,
+              38,
+              81,
+              57
+            ],
+            "area": 137.0,
+            "aspect_ratio": 0.631578947368421,
+            "centroid": [
+              75,
+              47
+            ]
+          },
+          {
+            "shape_type": "circle",
+            "vertices": 6,
+            "bbox": [
+              248,
+              33,
+              262,
+              53
+            ],
+            "area": 214.0,
+            "aspect_ratio": 0.7,
+            "centroid": [
+              255,
+              43
+            ]
+          },
+          {
+            "shape_type": "polygon",
+            "vertices": 8,
+            "bbox": [
+              112,
+              33,
+              137,
+              53
+            ],
+            "area": 226.5,
+            "aspect_ratio": 1.25,
+            "centroid": [
+              124,
+              43
+            ]
+          },
+          {
+            "shape_type": "polygon",
+            "vertices": 9,
+            "bbox": [
+              21,
+              33,
+              34,
+              53
+            ],
+            "area": 137.0,
+            "aspect_ratio": 0.65,
+            "centroid": [
+              27,
+              43
+            ]
+          }
+        ]
+      },
+      "lines": {
+        "total_lines": 6,
+        "lines": [
+          {
+            "start_point": [
+              113,
+              51
+            ],
+            "end_point": [
+              234,
+              51
+            ],
+            "length": 121.0,
+            "angle": 0.0
+          },
+          {
+            "start_point": [
+              21,
+              93
+            ],
+            "end_point": [
+              128,
+              93
+            ],
+            "length": 107.0,
+            "angle": 0.0
+          },
+          {
+            "start_point": [
+              112,
+              39
+            ],
+            "end_point": [
+              234,
+              39
+            ],
+            "length": 122.0,
+            "angle": 0.0
+          },
+          {
+            "start_point": [
+              21,
+              91
+            ],
+            "end_point": [
+              129,
+              91
+            ],
+            "length": 108.0,
+            "angle": 0.0
+          },
+          {
+            "start_point": [
+              21,
+              48
+            ],
+            "end_point": [
+              99,
+              48
+            ],
+            "length": 78.0,
+            "angle": 0.0
+          },
+          {
+            "start_point": [
+              22,
+              42
+            ],
+            "end_point": [
+              99,
+              42
+            ],
+            "length": 77.0,
+            "angle": 0.0
+          }
+        ]
+      },
+      "annotated_image": "sample_engineering_text_annotated.png"
+    }
+  },
+  "combined": {
+    "all_text": [
+      {
+        "method": "tesseract",
+        "text": "Sample Engineering Drawing\nDimensions: 150mm x 75mm\nMaterial: Steel Grade A",
+        "type": "printed"
+      },
+      {
+        "method": "trocr",
+        "text": "0-",
+        "type": "handwritten"
+      }
+    ],
+    "shapes_detected": [
+      {
+        "shape_type": "polygon",
+        "vertices": 6,
+        "bbox": [
+          177,
+          141,
+          195,
+          152
+        ],
+        "area": 116.0,
+        "aspect_ratio": 1.6363636363636365,
+        "centroid": [
+          186,
+          146
+        ]
+      },
+      {
+        "shape_type": "circle",
+        "vertices": 5,
+        "bbox": [
+          166,
+          86,
+          177,
+          102
+        ],
+        "area": 133.5,
+        "aspect_ratio": 0.6875,
+        "centroid": [
+          171,
+          94
+        ]
+      },
+      {
+        "shape_type": "circle",
+        "vertices": 5,
+        "bbox": [
+          21,
+          86,
+          33,
+          102
+        ],
+        "area": 151.0,
+        "aspect_ratio": 0.75,
+        "centroid": [
+          27,
+          94
+        ]
+      },
+      {
+        "shape_type": "rectangle",
+        "vertices": 4,
+        "bbox": [
+          320,
+          39,
+          332,
+          57
+        ],
+        "area": 166.0,
+        "aspect_ratio": 0.6666666666666666,
+        "centroid": [
+          326,
+          48
+        ]
+      },
+      {
+        "shape_type": "rectangle",
+        "vertices": 4,
+        "bbox": [
+          224,
+          39,
+          236,
+          57
+        ],
+        "area": 165.0,
+        "aspect_ratio": 0.6666666666666666,
+        "centroid": [
+          230,
+          48
+        ]
+      },
+      {
+        "shape_type": "polygon",
+        "vertices": 8,
+        "bbox": [
+          171,
+          39,
+          196,
+          53
+        ],
+        "area": 216.0,
+        "aspect_ratio": 1.7857142857142858,
+        "centroid": [
+          183,
+          46
+        ]
+      },
+      {
+        "shape_type": "rectangle",
+        "vertices": 4,
+        "bbox": [
+          139,
+          39,
+          150,
+          58
+        ],
+        "area": 155.0,
+        "aspect_ratio": 0.5789473684210527,
+        "centroid": [
+          144,
+          48
+        ]
+      },
+      {
+        "shape_type": "circle",
+        "vertices": 6,
+        "bbox": [
+          88,
+          39,
+          100,
+          52
+        ],
+        "area": 117.5,
+        "aspect_ratio": 0.9230769230769231,
+        "centroid": [
+          94,
+          45
+        ]
+      },
+      {
+        "shape_type": "polygon",
+        "vertices": 7,
+        "bbox": [
+          48,
+          39,
+          67,
+          52
+        ],
+        "area": 136.5,
+        "aspect_ratio": 1.4615384615384615,
+        "centroid": [
+          57,
+          45
+        ]
+      },
+      {
+        "shape_type": "circle",
+        "vertices": 5,
+        "bbox": [
+          35,
+          39,
+          46,
+          52
+        ],
+        "area": 114.0,
+        "aspect_ratio": 0.8461538461538461,
+        "centroid": [
+          40,
+          45
+        ]
+      },
+      {
+        "shape_type": "polygon",
+        "vertices": 6,
+        "bbox": [
+          263,
+          38,
+          285,
+          52
+        ],
+        "area": 129.5,
+        "aspect_ratio": 1.5714285714285714,
+        "centroid": [
+          274,
+          45
+        ]
+      },
+      {
+        "shape_type": "rectangle",
+        "vertices": 4,
+        "bbox": [
+          69,
+          38,
+          81,
+          57
+        ],
+        "area": 137.0,
+        "aspect_ratio": 0.631578947368421,
+        "centroid": [
+          75,
+          47
+        ]
+      },
+      {
+        "shape_type": "circle",
+        "vertices": 6,
+        "bbox": [
+          248,
+          33,
+          262,
+          53
+        ],
+        "area": 214.0,
+        "aspect_ratio": 0.7,
+        "centroid": [
+          255,
+          43
+        ]
+      },
+      {
+        "shape_type": "polygon",
+        "vertices": 8,
+        "bbox": [
+          112,
+          33,
+          137,
+          53
+        ],
+        "area": 226.5,
+        "aspect_ratio": 1.25,
+        "centroid": [
+          124,
+          43
+        ]
+      },
+      {
+        "shape_type": "polygon",
+        "vertices": 9,
+        "bbox": [
+          21,
+          33,
+          34,
+          53
+        ],
+        "area": 137.0,
+        "aspect_ratio": 0.65,
+        "centroid": [
+          27,
+          43
+        ]
+      }
+    ],
+    "lines_detected": [
+      {
+        "start_point": [
+          113,
+          51
+        ],
+        "end_point": [
+          234,
+          51
+        ],
+        "length": 121.0,
+        "angle": 0.0
+      },
+      {
+        "start_point": [
+          21,
+          93
+        ],
+        "end_point": [
+          128,
+          93
+        ],
+        "length": 107.0,
+        "angle": 0.0
+      },
+      {
+        "start_point": [
+          112,
+          39
+        ],
+        "end_point": [
+          234,
+          39
+        ],
+        "length": 122.0,
+        "angle": 0.0
+      },
+      {
+        "start_point": [
+          21,
+          91
+        ],
+        "end_point": [
+          129,
+          91
+        ],
+        "length": 108.0,
+        "angle": 0.0
+      },
+      {
+        "start_point": [
+          21,
+          48
+        ],
+        "end_point": [
+          99,
+          48
+        ],
+        "length": 78.0,
+        "angle": 0.0
+      },
+      {
+        "start_point": [
+          22,
+          42
+        ],
+        "end_point": [
+          99,
+          42
+        ],
+        "length": 77.0,
+        "angle": 0.0
+      }
+    ],
+    "confidence_scores": {},
+    "method_summary": {
+      "tesseract": {
+        "detections": 11,
+        "type": "printed_text"
+      },
+      "trocr": {
+        "text_found": true,
+        "type": "handwritten_text"
+      },
+      "yolo": {
+        "shapes": 15,
+        "lines": 6,
+        "objects": 0,
+        "type": "visual_elements"
+      }
+    }
+  }
+}

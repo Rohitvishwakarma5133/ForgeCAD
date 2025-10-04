@@ -1,0 +1,29 @@
+🔍 ENGINEERING DRAWING ANALYSIS REPORT
+============================================================
+Image: sample_engineering_drawing.png
+Analysis Date: 2025-10-04T05:52:57.621940
+Methods Used: tesseract, trocr, yolo
+
+📝 TEXT EXTRACTION SUMMARY:
+----------------------------------------
+1. [TESSERACT - printed]:
+   150mm
+Engineering Drawing
+2. [TROCR - handwritten]:
+   0 0
+
+🔷 SHAPES DETECTED:
+----------------------------------------
+   circle: 7
+   polygon: 4
+   triangle: 1
+   unknown: 1
+   rectangle: 1
+
+📏 LINES DETECTED: 10
+
+📊 METHOD PERFORMANCE:
+----------------------------------------
+   TESSERACT: {'detections': 5, 'type': 'printed_text'}
+   TROCR: {'text_found': True, 'type': 'handwritten_text'}
+   YOLO: {'shapes': 14, 'lines': 10, 'objects': 1, 'type': 'visual_elements'}

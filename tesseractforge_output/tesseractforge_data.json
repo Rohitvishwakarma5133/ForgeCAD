@@ -1,0 +1,98 @@
+{
+  "text_elements": [
+    {
+      "method": "tesseract",
+      "text": "Sample Engineering Drawing\nDimensions: 150mm x 75mm\nMaterial: Steel Grade A",
+      "type": "printed"
+    },
+    {
+      "method": "trocr",
+      "text": "0-",
+      "type": "handwritten"
+    }
+  ],
+  "dimensions": [
+    {
+      "dimension": "150mm",
+      "type": "length"
+    },
+    {
+      "dimension": "75mm",
+      "type": "width"
+    }
+  ],
+  "materials": [
+    {
+      "material": "Steel Grade A",
+      "quantity": 1
+    }
+  ],
+  "components": [
+    {
+      "component": "Shape_0",
+      "type": "polygon"
+    },
+    {
+      "component": "Shape_1",
+      "type": "circle"
+    },
+    {
+      "component": "Shape_2",
+      "type": "circle"
+    },
+    {
+      "component": "Shape_3",
+      "type": "rectangle"
+    },
+    {
+      "component": "Shape_4",
+      "type": "rectangle"
+    },
+    {
+      "component": "Shape_5",
+      "type": "polygon"
+    },
+    {
+      "component": "Shape_6",
+      "type": "rectangle"
+    },
+    {
+      "component": "Shape_7",
+      "type": "circle"
+    },
+    {
+      "component": "Shape_8",
+      "type": "polygon"
+    },
+    {
+      "component": "Shape_9",
+      "type": "circle"
+    },
+    {
+      "component": "Shape_10",
+      "type": "polygon"
+    },
+    {
+      "component": "Shape_11",
+      "type": "rectangle"
+    },
+    {
+      "component": "Shape_12",
+      "type": "circle"
+    },
+    {
+      "component": "Shape_13",
+      "type": "polygon"
+    },
+    {
+      "component": "Shape_14",
+      "type": "polygon"
+    }
+  ],
+  "relationships": [],
+  "metadata": {
+    "processing_timestamp": "2025-10-04T06:00:34.015783",
+    "total_elements": 20,
+    "data_quality_score": 0.85
+  }
+}
