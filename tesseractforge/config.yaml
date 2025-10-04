@@ -1,0 +1,104 @@
+# TesseractForge Configuration File
+# This file contains settings for all modules in the pipeline
+
+# OCR Module Configuration
+ocr:
+  engines: ["openai", "tesseract", "easyocr"]  # Available OCR engines
+  max_concurrent: 3                            # Maximum concurrent OCR operations
+  timeout: 30                                  # Timeout in seconds
+  fallback_order: ["openai", "tesseract", "easyocr"]  # Order of fallback engines
+
+# Symbol Detection Configuration
+symbol_detection:
+  use_opencv: true                             # Enable OpenCV-based detection
+  use_yolo: true                              # Enable YOLO object detection
+  min_confidence: 0.7                         # Minimum confidence threshold
+  yolo_model: "yolov8n.pt"                    # YOLO model to use
+  detection_types: ["circles", "rectangles", "lines", "text_boxes"]
+
+# Semantic Understanding Configuration
+semantic:
+  use_openai: true                            # Enable OpenAI GPT-4 Vision
+  use_claude: true                            # Enable Claude AI
+  temperature: 0.1                            # AI model temperature (lower = more deterministic)
+  max_tokens: 2000                            # Maximum tokens per API call
+  analysis_depth: "comprehensive"             # Analysis depth: basic, standard, comprehensive
+
+# Data Pipeline Configuration
+pipeline:
+  max_concurrent_jobs: 5                      # Maximum concurrent processing jobs
+  batch_size: 10                              # Images per batch
+  retry_attempts: 3                           # Number of retry attempts on failure
+  enable_caching: true                        # Enable result caching
+  cache_duration: 24                          # Cache duration in hours
+
+# Export Module Configuration
+export:
+  default_formats: ["excel", "pdf", "json"]   # Default export formats
+  output_dir: "output"                        # Default output directory
+  excel:
+    include_images: true                      # Include images in Excel export
+    create_summary: true                      # Create summary worksheet
+    format_cells: true                        # Apply cell formatting
+  pdf:
+    include_visualizations: true              # Include charts and graphs
+    page_size: "A4"                          # Page size: A4, letter, etc.
+    margin: 0.75                             # Page margin in inches
+  autodesk:
+    timeout: 30                              # API timeout in seconds
+    project_id: null                         # Default project ID (if any)
+
+# Server Configuration
+server:
+  host: "0.0.0.0"                            # Server host
+  port: 8000                                 # Server port
+  workers: 1                                 # Number of worker processes
+  cors_origins: ["*"]                        # Allowed CORS origins
+  upload_max_size: 100                       # Maximum upload size in MB
+
+# Logging Configuration
+logging:
+  level: "INFO"                              # Logging level: DEBUG, INFO, WARNING, ERROR
+  file_rotation: "1 day"                     # Log file rotation
+  file_retention: "30 days"                  # Log file retention
+  console_output: true                       # Enable console output
+
+# Performance Configuration
+performance:
+  image_preprocessing:
+    resize_max_dimension: 2048               # Maximum image dimension for processing
+    enable_denoising: true                   # Enable image denoising
+    enhance_contrast: true                   # Enable contrast enhancement
+  
+  memory:
+    max_image_cache_size: 100                # Maximum images in memory cache
+    garbage_collection_interval: 300        # GC interval in seconds
+  
+  gpu:
+    enable_gpu: false                        # Enable GPU acceleration (if available)
+    gpu_memory_fraction: 0.8                # GPU memory fraction to use
+
+# Quality Assurance Configuration
+quality:
+  min_ocr_confidence: 0.6                    # Minimum OCR confidence threshold
+  max_processing_time: 300                   # Maximum processing time per image (seconds)
+  validation:
+    check_image_format: true                 # Validate image format
+    check_image_size: true                   # Validate image size
+    min_image_resolution: [100, 100]         # Minimum image resolution [width, height]
+    max_image_resolution: [8000, 8000]       # Maximum image resolution [width, height]
+
+# Error Handling Configuration
+error_handling:
+  retry_on_failure: true                     # Retry on failure
+  max_retry_attempts: 3                      # Maximum retry attempts
+  retry_delay: 5                             # Delay between retries (seconds)
+  continue_on_error: true                    # Continue processing other images on error
+  save_error_logs: true                      # Save detailed error logs
+
+# Development Configuration
+development:
+  debug_mode: false                          # Enable debug mode
+  save_intermediate_results: false           # Save intermediate processing results
+  profiling_enabled: false                  # Enable performance profiling
+  mock_api_calls: false                      # Use mock API calls for testing
