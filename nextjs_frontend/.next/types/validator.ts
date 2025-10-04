@@ -146,6 +146,42 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/api/forge/buckets/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/forge/buckets">> = Specific
+  const handler = {} as typeof import("../../app/api/forge/buckets/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/forge/token/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/forge/token">> = Specific
+  const handler = {} as typeof import("../../app/api/forge/token/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/forge/translate/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/forge/translate">> = Specific
+  const handler = {} as typeof import("../../app/api/forge/translate/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/forge/upload/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/forge/upload">> = Specific
+  const handler = {} as typeof import("../../app/api/forge/upload/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/history/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/history">> = Specific
@@ -195,6 +231,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/upload">> = Specific
   const handler = {} as typeof import("../../app/api/upload/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/validation/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/validation">> = Specific
+  const handler = {} as typeof import("../../app/api/validation/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

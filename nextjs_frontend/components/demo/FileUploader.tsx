@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { SUPPORTED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/constants';
 
 interface FileUploaderProps {
-  onUpload: (file: File) => void;
+  onUpload: (uploadResult: File | { filename: string; conversionId: string }) => void;
   onSampleLoad: (sampleName: string) => void;
   isUploading?: boolean;
 }
@@ -29,9 +29,31 @@ export default function FileUploader({ onUpload, onSampleLoad, isUploading = fal
     disabled: isUploading,
   });
 
-  const handleUpload = () => {
-    if (file && !isUploading) {
-      onUpload(file);
+  const handleUpload = async () => {
+    if (!file || isUploading) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('projectName', 'Demo Project');
+      formData.append('drawingType', 'Demo');
+      formData.append('priority', 'normal');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      onUpload(result); // Pass the API response instead of just the file
+    } catch (error) {
+      console.error('Upload error:', error);
+      // For demo purposes, still proceed with mock data
+      onUpload({ filename: file.name, conversionId: `demo_${Date.now()}` });
     }
   };
 

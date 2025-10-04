@@ -1,15 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight, Play, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { STATS } from '@/lib/constants';
 
 export default function Hero() {
+  const [showVideo, setShowVideo] = useState(false);
+
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-      <div className="absolute inset-0 bg-black/20" />
+    <>
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+        <div className="absolute inset-0 bg-black/20" />
       <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Text */}
@@ -35,6 +39,7 @@ export default function Hero() {
                 size="lg" 
                 variant="outline" 
                 className="border-white text-white hover:bg-white/10 font-semibold"
+                onClick={() => setShowVideo(true)}
               >
                 <Play className="mr-2 h-5 w-5" /> Watch Video
               </Button>
@@ -96,6 +101,62 @@ export default function Hero() {
           </motion.div>
         </div>
       </div>
-    </section>
+      </section>
+
+      {/* Video Modal */}
+      {showVideo && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowVideo(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-2xl p-8 max-w-2xl w-full relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4"
+              onClick={() => setShowVideo(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                CADly Demo Video
+              </h3>
+              <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-6">
+                <div className="text-center">
+                  <Play className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+                  <p className="text-gray-600">
+                    Demo video coming soon!
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    For now, try our interactive demo
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4 justify-center">
+                <Link href="/demo">
+                  <Button onClick={() => setShowVideo(false)}>
+                    Try Interactive Demo
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={() => setShowVideo(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </>
   );
 }

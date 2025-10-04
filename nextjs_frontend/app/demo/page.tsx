@@ -5,21 +5,35 @@ import { motion } from 'framer-motion';
 import FileUploader from '@/components/demo/FileUploader';
 import ProcessingView from '@/components/demo/ProcessingView';
 import ResultsViewer from '@/components/demo/ResultsViewer';
+import ToastProvider from '@/components/ui/toast';
 
 type DemoState = 'upload' | 'processing' | 'results';
 
 export default function DemoPage() {
   const [state, setState] = useState<DemoState>('upload');
   const [uploadedFile, setUploadedFile] = useState<string>('');
+  const [conversionId, setConversionId] = useState<string>('');
   const [result, setResult] = useState<any>(null);
 
-  const handleFileUpload = (file: File) => {
-    setUploadedFile(file.name);
+  const handleFileUpload = (uploadResult: any) => {
+    // Always use Moore Industries filename for demo consistency
+    const mooreFilename = '531_CAD_Drawing_Moore_Industries.dwg';
+    
+    if (uploadResult instanceof File) {
+      setUploadedFile(mooreFilename);
+      setConversionId(`moore_upload_${Date.now()}`);
+    } else {
+      setUploadedFile(mooreFilename);
+      setConversionId(uploadResult.conversionId);
+    }
     setState('processing');
   };
 
   const handleSampleLoad = (sampleName: string) => {
-    setUploadedFile(sampleName);
+    // Always use the Moore Industries filename for demo consistency
+    const mooreFilename = '531_CAD_Drawing_Moore_Industries.dwg';
+    setUploadedFile(mooreFilename);
+    setConversionId(`moore_sample_${Date.now()}`);
     setState('processing');
   };
 
@@ -31,12 +45,14 @@ export default function DemoPage() {
   const handleStartNew = () => {
     setState('upload');
     setUploadedFile('');
+    setConversionId('');
     setResult(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-4 py-12">
+    <ToastProvider>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -134,7 +150,7 @@ export default function DemoPage() {
             >
               <ProcessingView 
                 filename={uploadedFile}
-                conversionId={`demo_${Date.now()}`}
+                conversionId={conversionId}
                 onComplete={handleProcessingComplete}
               />
             </motion.div>
@@ -195,7 +211,8 @@ export default function DemoPage() {
             </div>
           </motion.div>
         )}
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }
