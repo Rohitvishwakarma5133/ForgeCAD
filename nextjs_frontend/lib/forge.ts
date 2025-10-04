@@ -139,7 +139,7 @@ export class ForgeClient {
         fileBuffer = request.file;
       } else {
         // For File objects (browser)
-        const arrayBuffer = await request.file.arrayBuffer();
+        const arrayBuffer = await (request.file as File).arrayBuffer();
         fileBuffer = Buffer.from(arrayBuffer);
       }
 

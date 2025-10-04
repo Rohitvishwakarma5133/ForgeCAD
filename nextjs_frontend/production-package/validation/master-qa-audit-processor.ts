@@ -230,7 +230,7 @@ class MasterQAAuditProcessor {
             
         } catch (error) {
             console.error('❌ QA Audit Validation Failed:', error);
-            throw new Error(`QA audit validation failed: ${error.message}`);
+            throw new Error(`QA audit validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -401,7 +401,7 @@ class MasterQAAuditProcessor {
             coordinates: [symbol.location.x, symbol.location.y],
             attributes: new Map([
                 ['symbolType', symbol.type],
-                ['confidence', symbol.confidence]
+                ['confidence', symbol.confidence.toString()]
             ]),
             dimensions: {
                 width: {
@@ -566,7 +566,7 @@ class MasterQAAuditProcessor {
         }
 
         // QA Finding 2.2: Duplicated safety tags
-        const tagTexts = textResults.normalizedTags.map(tag => tag.normalized);
+        const tagTexts = textResults.normalizedTags.map((tag: any) => tag.normalized);
         const uniqueTags = new Set(tagTexts);
         const duplicateCount = tagTexts.length - uniqueTags.size;
         
@@ -1123,12 +1123,5 @@ export const PRODUCTION_QA_CONFIG: QAAuditConfig = {
     maxCriticalMissingRate: 0.05
 };
 
-export {
-    MasterQAAuditProcessor,
-    QAAuditConfig,
-    CADValidationInput,
-    QAValidationResult,
-    QAIssue,
-    QAFix,
-    QARecommendation
-};
+export { MasterQAAuditProcessor };
+export type { QAAuditConfig, CADValidationInput, QAValidationResult, QAIssue, QAFix, QARecommendation };

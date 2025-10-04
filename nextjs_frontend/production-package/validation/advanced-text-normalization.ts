@@ -31,9 +31,9 @@ interface TextIssue {
 
 class AdvancedTextNormalizer {
     private config: TextNormalizationConfig;
-    private unicodeLookupMap: Map<string, string>;
-    private numericContextPatterns: RegExp[];
-    private symbolPatterns: Map<string, string>;
+    private unicodeLookupMap: Map<string, string> = new Map();
+    private numericContextPatterns: RegExp[] = [];
+    private symbolPatterns: Map<string, string> = new Map();
 
     constructor(config: TextNormalizationConfig) {
         this.config = config;
@@ -43,52 +43,44 @@ class AdvancedTextNormalizer {
 
     private initializeLookupMaps() {
         // QA Finding 1.1: Unicode corruption lookup map
-        this.unicodeLookupMap = new Map([
-            // Greek letters and symbols
-            ['˛�P', 'ΔP'],
-            ['Î"P', 'ΔP'], 
-            ['â–³P', 'ΔP'],
-            ['â�¢', '•'],
-            ['â€¢', '•'],
-            ['Ã©', 'é'],
-            ['â€™', "'"],
-            ['â€œ', '"'],
-            ['â€�', '"'],
-            ['Â°', '°'],
-            ['Âµ', 'µ'],
-            ['ÂΩ', 'Ω'],
-            ['Ã˜', 'Ø'],
-            ['Ã¸', 'ø'],
-            ['âŒ€', '⌀'],
-            // Extended ASCII corruptions
-            ['Ã ', 'à'],
-            ['Ã¡', 'á'],
-            ['Ã¢', 'â'],
-            ['Ã£', 'ã'],
-            ['Ã¤', 'ä'],
-            ['Ã¥', 'å'],
-            // Common encoding artifacts
-            ['ï»¿', ''], // BOM removal
-            ['â†'', '→'],
-            ['â†�', '←'],
-            ['â†'', '↑'],
-            ['â†"', '↓'],
-        ]);
-
+        this.unicodeLookupMap.clear();
+        this.unicodeLookupMap.set('˛�P', 'ΔP');
+        this.unicodeLookupMap.set('Î"P', 'ΔP');
+        this.unicodeLookupMap.set('â–³P', 'ΔP');
+        this.unicodeLookupMap.set('â�¢', '•');
+        this.unicodeLookupMap.set('â€¢', '•');
+        this.unicodeLookupMap.set('Ã©', 'é');
+        this.unicodeLookupMap.set('â€™', "'");
+        this.unicodeLookupMap.set('â€œ', '"');
+        this.unicodeLookupMap.set('â€�', '"');
+        this.unicodeLookupMap.set('Â°', '°');
+        this.unicodeLookupMap.set('Âµ', 'µ');
+        this.unicodeLookupMap.set('ÂΩ', 'Ω');
+        this.unicodeLookupMap.set('Ã˜', 'Ø');
+        this.unicodeLookupMap.set('Ã¸', 'ø');
+        this.unicodeLookupMap.set('âŒ€', '⌀');
+        this.unicodeLookupMap.set('Ã ', 'à');
+        this.unicodeLookupMap.set('Ã¡', 'á');
+        this.unicodeLookupMap.set('Ã¢', 'â');
+        this.unicodeLookupMap.set('Ã£', 'ã');
+        this.unicodeLookupMap.set('Ã¤', 'ä');
+        this.unicodeLookupMap.set('Ã¥', 'å');
+        this.unicodeLookupMap.set('ï»¿', ''); // BOM removal
+        this.unicodeLookupMap.set('\u00E2\u2020\u2019', '\u2192');
+        this.unicodeLookupMap.set('\u00E2\u2020\uFFFD', '\u2190');
+        this.unicodeLookupMap.set('\u00E2\u2020\u2018', '\u2191');
+        this.unicodeLookupMap.set('\u00E2\u2020\u201D', '\u2193');
+        
         // QA Finding 1.4: Symbol pattern restoration
-        this.symbolPatterns = new Map([
-            // Diameter symbols
-            ['(\\d+)\\s*in', 'Ø$1 in'],
-            ['(\\d+)\\s*mm', 'Ø$1 mm'],
-            ['(\\d+)\\s*cm', 'Ø$1 cm'],
-            // Degree symbols
-            ['(\\d+)\\s*C(?!\\w)', '$1°C'],
-            ['(\\d+)\\s*F(?!\\w)', '$1°F'],
-            // Delta P patterns
-            ['dP', 'ΔP'],
-            ['Delta P', 'ΔP'],
-            ['delta-P', 'ΔP'],
-        ]);
+        this.symbolPatterns.clear();
+        this.symbolPatterns.set('(\\\\d+)\\\\s*in', 'Ø$1 in');
+        this.symbolPatterns.set('(\\\\d+)\\\\s*mm', 'Ø$1 mm');
+        this.symbolPatterns.set('(\\\\d+)\\\\s*cm', 'Ø$1 cm');
+        this.symbolPatterns.set('(\\\\d+)\\\\s*C(?!\\\\w)', '$1°C');
+        this.symbolPatterns.set('(\\\\d+)\\\\s*F(?!\\\\w)', '$1°F');
+        this.symbolPatterns.set('dP', 'ΔP');
+        this.symbolPatterns.set('Delta P', 'ΔP');
+        this.symbolPatterns.set('delta-P', 'ΔP');
     }
 
     private initializePatterns() {
@@ -687,4 +679,5 @@ export const PRODUCTION_TEXT_CONFIG: TextNormalizationConfig = {
     confidenceThreshold: 0.8
 };
 
-export { AdvancedTextNormalizer, TextNormalizationConfig, NormalizedText, TextIssue };
+export { AdvancedTextNormalizer };
+export type { TextNormalizationConfig, NormalizedText, TextIssue };

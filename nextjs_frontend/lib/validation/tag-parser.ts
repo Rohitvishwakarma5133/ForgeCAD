@@ -75,8 +75,7 @@ export class TagParser {
     '_': '-', // Underscore to hyphen
     '‐': '-', // En dash to hyphen
     '—': '-', // Em dash to hyphen
-    '"': '"', // Smart quote to regular quote
-    '"': '"', // Smart quote to regular quote
+    '"': '"', // Smart quotes to regular quote
   };
 
   private unitNormalizations: Record<string, string> = {

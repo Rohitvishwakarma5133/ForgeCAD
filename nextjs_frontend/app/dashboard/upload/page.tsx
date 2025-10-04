@@ -29,40 +29,49 @@ export default function DashboardUploadPage() {
     setState('upload');
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (uploadResult: File | { filename: string; conversionId: string }) => {
     if (!drawingType) {
       setError('Please select a drawing type first');
       return;
     }
 
-    setUploadedFile(file.name);
-    setError(null);
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('projectName', projectName || 'Untitled Project');
-      formData.append('drawingType', drawingType);
-      formData.append('priority', priority);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
-      }
-
-      setConversionId(data.conversionId);
-      setState('processing');
+    // Handle both File objects and upload results
+    if (uploadResult instanceof File) {
+      const file = uploadResult;
+      setUploadedFile(file.name);
+      setError(null);
       
-    } catch (error) {
-      console.error('Upload error:', error);
-      setError(error instanceof Error ? error.message : 'Upload failed');
-      setState('error');
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('projectName', projectName || 'Untitled Project');
+        formData.append('drawingType', drawingType);
+        formData.append('priority', priority);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Upload failed');
+        }
+
+        setConversionId(data.conversionId);
+        setState('processing');
+        
+      } catch (error) {
+        console.error('Upload error:', error);
+        setError(error instanceof Error ? error.message : 'Upload failed');
+        setState('error');
+      }
+    } else {
+      // Handle upload result object (from FileUploader component)
+      setUploadedFile(uploadResult.filename);
+      setConversionId(uploadResult.conversionId);
+      setState('processing');
     }
   };
 

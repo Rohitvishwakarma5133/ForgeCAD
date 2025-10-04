@@ -704,11 +704,11 @@ export default function ResultsViewer({ result, onStartNew }: ResultsViewerProps
             '0 0 0 rg',
             '0 -20 Td',
             '/F1 10 Tf',
-            `(High Confidence Items (≥90%): ${highConfItems} items (${Math.round((highConfItems/(result.equipmentCount + result.instrumentCount))*100)}%)) Tj`,
+            `(High Confidence Items (≥90%): ${highConfItems} items (${Math.round((highConfItems/((result.equipmentCount || 0) + (result.instrumentCount || 0)))*100) || 0}%)) Tj`,
             '0 -12 Td',
-            `(Medium Confidence Items (70-89%): ${mediumConfItems} items (${Math.round((mediumConfItems/(result.equipmentCount + result.instrumentCount))*100)}%)) Tj`,
+            `(Medium Confidence Items (70-89%): ${mediumConfItems} items (${Math.round((mediumConfItems/((result.equipmentCount || 0) + (result.instrumentCount || 0)))*100) || 0}%)) Tj`,
             '0 -12 Td',
-            `(Low Confidence Items (<70%): ${lowConfItems} items (${Math.round((lowConfItems/(result.equipmentCount + result.instrumentCount))*100)}%)) Tj`,
+            `(Low Confidence Items (<70%): ${lowConfItems} items (${Math.round((lowConfItems/((result.equipmentCount || 0) + (result.instrumentCount || 0)))*100) || 0}%)) Tj`,
             '0 -20 Td',
             '(PROCESSING PERFORMANCE METRICS:) Tj',
             '0 -15 Td',
@@ -777,8 +777,8 @@ export default function ResultsViewer({ result, onStartNew }: ResultsViewerProps
         
         // Create multi-page PDF structure
         const pageCount = pages.length;
-        const pageObjects = [];
-        const contentObjects = [];
+        const pageObjects: any[] = [];
+        const contentObjects: any[] = [];
         let objectNumber = 3; // Starting after catalog and pages objects
         
         // Generate page and content objects for each page

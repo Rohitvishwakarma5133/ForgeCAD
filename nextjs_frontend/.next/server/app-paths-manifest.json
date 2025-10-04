@@ -1,5 +1,26 @@
 {
-  "/api/upload/route": "app/api/upload/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/dashboard/route": "app/api/dashboard/route.js",
+  "/api/download/[id]/route": "app/api/download/[id]/route.js",
+  "/api/forge/buckets/route": "app/api/forge/buckets/route.js",
+  "/api/forge/token/route": "app/api/forge/token/route.js",
+  "/api/forge/translate/route": "app/api/forge/translate/route.js",
+  "/api/forge/upload/route": "app/api/forge/upload/route.js",
+  "/api/history/route": "app/api/history/route.js",
+  "/api/preview/[id]/route": "app/api/preview/[id]/route.js",
+  "/api/projects/[id]/route": "app/api/projects/[id]/route.js",
+  "/api/projects/route": "app/api/projects/route.js",
   "/api/status/[id]/route": "app/api/status/[id]/route.js",
-  "/demo/page": "app/demo/page.js"
+  "/api/upload/route": "app/api/upload/route.js",
+  "/api/validation/route": "app/api/validation/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/contact/page": "app/contact/page.js",
+  "/demo/page": "app/demo/page.js",
+  "/features/page": "app/features/page.js",
+  "/page": "app/page.js",
+  "/pricing/page": "app/pricing/page.js",
+  "/dashboard/history/page": "app/dashboard/history/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/projects/page": "app/dashboard/projects/page.js",
+  "/dashboard/upload/page": "app/dashboard/upload/page.js"
 }

@@ -59,7 +59,7 @@ interface TopologyIssue {
 class EnhancedGeometryProcessor {
     private config: GeometryConfig;
     private dwgAttributes: Map<string, any>;
-    private semanticRules: Map<string, string[]>;
+    private semanticRules: Map<string, string[]> = new Map();
 
     constructor(config: GeometryConfig) {
         this.config = config;
@@ -248,7 +248,7 @@ class EnhancedGeometryProcessor {
                     id: junction.id,
                     type: 'CIRCLE',
                     coordinates: junction.coordinates,
-                    attributes: new Map([['junction', true], ['radius', 2]]),
+                    attributes: new Map([['junction', 'true'], ['radius', '2']]),
                     dimensions: { diameter: { original: 4, dwgAttribute: null, corrected: 4, accuracy: 100, source: 'INFERRED', confidence: 0.9 }},
                     connections: junction.connections,
                     confidence: junction.confidence
@@ -352,7 +352,7 @@ class EnhancedGeometryProcessor {
                         // Try to correct the connection type
                         const suggestedType = this.suggestConnectionType(instrumentType, line);
                         if (suggestedType) {
-                            currentConnection.semanticType = suggestedType;
+                            currentConnection.semanticType = suggestedType as 'FLOW_LINE' | 'CONTROL_LINE' | 'POWER_LINE' | 'DATA_LINE';
                             correctedConnections++;
                             
                             issues.push({
@@ -386,7 +386,7 @@ class EnhancedGeometryProcessor {
                             line.connections.push({
                                 elementId: instrument.id,
                                 connectionType: 'PIPE',
-                                semanticType: suggestedType,
+                                semanticType: suggestedType as 'FLOW_LINE' | 'CONTROL_LINE' | 'POWER_LINE' | 'DATA_LINE',
                                 confidence: 0.7,
                                 hasArrow: false
                             });
@@ -973,11 +973,5 @@ export const PRODUCTION_GEOMETRY_CONFIG: GeometryConfig = {
     preserveVertexPolylines: true
 };
 
-export {
-    EnhancedGeometryProcessor,
-    GeometryConfig,
-    GeometricElement,
-    DimensionalData,
-    Connection,
-    TopologyIssue
-};
+export { EnhancedGeometryProcessor };
+export type { GeometryConfig, GeometricElement, DimensionalData, Connection, TopologyIssue };

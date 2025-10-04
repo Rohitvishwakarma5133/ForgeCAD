@@ -113,7 +113,7 @@ export interface ForgeError {
   developerMessage: string;
   userMessage: string;
   errorCode: string;
-  more info: string;
+  moreInfo: string;
 }
 
 // API Response Types

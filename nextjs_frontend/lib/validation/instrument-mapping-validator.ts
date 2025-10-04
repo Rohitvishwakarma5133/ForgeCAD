@@ -477,7 +477,13 @@ export class InstrumentMappingValidator {
     requiresPower: boolean;
     powerRequired: boolean;
   } {
-    const requirements = {
+    const requirements: Record<string, {
+      minProcessLines: number;
+      maxProcessLineTypes: number;
+      requiresSignal: boolean;
+      requiresPower: boolean;
+      powerRequired: boolean;
+    }> = {
       pressure: { minProcessLines: 1, maxProcessLineTypes: 1, requiresSignal: true, requiresPower: true, powerRequired: true },
       temperature: { minProcessLines: 1, maxProcessLineTypes: 1, requiresSignal: true, requiresPower: true, powerRequired: true },
       flow: { minProcessLines: 1, maxProcessLineTypes: 1, requiresSignal: true, requiresPower: true, powerRequired: true },
@@ -493,7 +499,7 @@ export class InstrumentMappingValidator {
    * Get expected flow direction for instrument type
    */
   private getExpectedFlowDirection(instrumentType: string): number {
-    const directions = {
+    const directions: Record<string, number> = {
       pressure: 90,  // Perpendicular to flow
       temperature: 0, // Parallel to flow
       flow: 0,       // Parallel to flow

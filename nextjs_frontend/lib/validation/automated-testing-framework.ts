@@ -295,7 +295,12 @@ export class AutomatedTestingFramework {
         items.push({
           id: `dwg-${dwgEntity.id}`,
           type: dwgEntity.type === 'block' ? 'symbol' : 'tag',
-          dwgGeometry: dwgEntity.geometry,
+          dwgGeometry: {
+            x: dwgEntity.geometry.x,
+            y: dwgEntity.geometry.y,
+            width: dwgEntity.geometry.width || 0,
+            height: dwgEntity.geometry.height || 0
+          },
           extractedGeometry: correspondingExtracted.geometry,
           status,
           confidence: correspondingExtracted.confidence,
@@ -307,7 +312,12 @@ export class AutomatedTestingFramework {
         items.push({
           id: `missing-${dwgEntity.id}`,
           type: dwgEntity.type === 'block' ? 'symbol' : 'tag',
-          dwgGeometry: dwgEntity.geometry,
+          dwgGeometry: {
+            x: dwgEntity.geometry.x,
+            y: dwgEntity.geometry.y,
+            width: dwgEntity.geometry.width || 0,
+            height: dwgEntity.geometry.height || 0
+          },
           status: 'missing_in_extracted',
           notes: [`Tag "${entityTag}" found in DWG but not extracted`]
         });

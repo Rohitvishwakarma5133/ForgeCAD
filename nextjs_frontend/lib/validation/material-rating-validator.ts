@@ -75,7 +75,10 @@ export interface MaterialDatabase {
 }
 
 export class MaterialRatingValidator {
-  private materialDatabase: MaterialDatabase;
+  private materialDatabase: MaterialDatabase = {
+    materials: [],
+    ratings: []
+  };
   private layerConventions: LayerMetadata[] = [];
   private proximityThreshold = 50; // pixels
   private fragmentMergeThreshold = 20; // pixels
