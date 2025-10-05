@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Build sort criteria
-    let sortCriteria: any = {};
+    const sortCriteria: Record<string, 1 | -1> = {};
     switch (sortBy) {
       case 'filename':
         sortCriteria.fileName = sortOrder === 'asc' ? 1 : -1;

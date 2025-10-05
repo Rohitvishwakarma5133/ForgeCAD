@@ -618,7 +618,7 @@ export class InstrumentMappingValidator {
     
     if (lenSq === 0) return Math.sqrt(A * A + B * B);
 
-    let param = dot / lenSq;
+    const param = dot / lenSq;
     
     if (param < 0) {
       return Math.sqrt(A * A + B * B);

@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   email: {
     type: String,
@@ -74,6 +75,7 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   ipAddress: {
     type: String,
@@ -171,13 +173,13 @@ const conversionSchema = new mongoose.Schema({
 });
 
 // Add indexes for better performance
-userSchema.index({ clerkId: 1 });
+// clerkId indexes are handled by schema definition with index: true
 userSchema.index({ email: 1 });
 userSchema.index({ lastLoginAt: -1 });
 conversionSchema.index({ clerkId: 1, createdAt: -1 });
 conversionSchema.index({ status: 1 });
 sessionSchema.index({ clerkId: 1, loginAt: -1 });
-sessionSchema.index({ sessionId: 1 });
+// sessionId index is handled by schema definition with index: true
 sessionSchema.index({ isActive: 1, lastActivity: -1 });
 
 // Export models

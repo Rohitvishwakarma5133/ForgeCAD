@@ -178,7 +178,7 @@ export class EnhancedTagParser {
     dwgReferenceTag?: string
   ): TagNormalizationResult {
     const appliedRules: string[] = [];
-    let workingTag = originalTag;
+    const workingTag = originalTag;
     
     // Track original for rule application
     const beforeNormalization = workingTag;
