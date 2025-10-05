@@ -132,3 +132,20 @@
 .clerk-tooltip {
   display: none !important;
 }
+
+/* Optimize Clerk loading performance */
+.cl-rootBox {
+  min-height: auto;
+}
+
+/* Prevent layout shifts during Clerk loading */
+.cl-signIn-root,
+.cl-signUp-root {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Improve hydration performance */
+.cl-internal-1wany65 {
+  contain: layout style;
+}
