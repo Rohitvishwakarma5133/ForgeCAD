@@ -1109,7 +1109,7 @@ export default function ResultsViewer({ result, onStartNew }: ResultsViewerProps
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {downloadOptions.map((option, index) => {
                     const IconComponent = option.icon;
                     const isCurrentlyDownloading = isDownloading === option.format;
@@ -1117,24 +1117,24 @@ export default function ResultsViewer({ result, onStartNew }: ResultsViewerProps
                       <Button
                         key={index}
                         variant="outline"
-                        className="h-24 p-4 flex flex-col items-center justify-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 relative group"
+                        className="h-28 p-4 flex flex-col items-center justify-center gap-3 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 relative group min-w-0"
                         onClick={() => handleDownload(option.format)}
                         disabled={isDownloading !== null}
                       >
                         {isCurrentlyDownloading ? (
                           <>
-                            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                            <div className="text-center">
-                              <div className="font-semibold text-blue-600 text-sm">Downloading...</div>
-                              <div className="text-xs text-blue-500">Please wait</div>
+                            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                            <div className="text-center min-w-0 w-full">
+                              <div className="font-semibold text-blue-600 text-sm truncate">Downloading...</div>
+                              <div className="text-xs text-blue-500 truncate">Please wait</div>
                             </div>
                           </>
                         ) : (
                           <>
-                            <IconComponent className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors" />
-                            <div className="text-center">
-                              <div className="font-semibold text-sm">{option.format}</div>
-                              <div className="text-xs text-gray-500 group-hover:text-gray-600">{option.description}</div>
+                            <IconComponent className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors flex-shrink-0" />
+                            <div className="text-center min-w-0 w-full">
+                              <div className="font-semibold text-sm truncate">{option.format}</div>
+                              <div className="text-xs text-gray-500 group-hover:text-gray-600 truncate leading-tight">{option.description}</div>
                             </div>
                           </>
                         )}

@@ -180,7 +180,7 @@ export default function PricingPage() {
                     <div className="pt-6">
                       {tier.id === 'enterprise' ? (
                         <Link href="/contact">
-                          <Button className="w-full" size="lg">
+                          <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200" size="lg">
                             Contact Sales
                           </Button>
                         </Link>
@@ -432,7 +432,7 @@ export default function PricingPage() {
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button variant="outline" size="lg" className="px-8">
+                  <Button variant="outline" size="lg" className="px-8 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 font-medium transition-all duration-200">
                     Contact Sales
                   </Button>
                 </Link>
