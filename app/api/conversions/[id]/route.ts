@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/mongodb';
 import { Conversion } from '@/lib/models';
+import { isDatabaseEnabled } from '@/lib/db-config';
 import mongoose from 'mongoose';
 
 interface RouteParams {
@@ -29,6 +30,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid conversion ID' }, { status: 400 });
     }
 
+    if (!isDatabaseEnabled()) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+    
     await dbConnect();
     
     const updateData = await request.json();
@@ -83,6 +88,10 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid conversion ID' }, { status: 400 });
     }
 
+    if (!isDatabaseEnabled()) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+    
     await dbConnect();
     
     const conversion = await Conversion.findOne({
@@ -123,6 +132,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid conversion ID' }, { status: 400 });
     }
 
+    if (!isDatabaseEnabled()) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    }
+    
     await dbConnect();
     
     const result = await Conversion.findOneAndDelete({
