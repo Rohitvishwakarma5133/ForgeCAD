@@ -41,6 +41,11 @@ export async function POST(request: NextRequest) {
     
     await newConversion.save();
     
+    // Increment user conversion counters
+    user.totalConversions = (user.totalConversions || 0) + 1;
+    user.monthlyConversions = (user.monthlyConversions || 0) + 1;
+    await user.save();
+    
     return NextResponse.json({ conversion: newConversion }, { status: 201 });
   } catch (error) {
     console.error('Error creating conversion:', error);

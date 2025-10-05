@@ -13,16 +13,19 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
     
-    const { email, firstName, lastName } = await request.json();
+    const { email, firstName, lastName, imageUrl, sessionId } = await request.json();
 
     // Check if user already exists
     const existingUser = await User.findOne({ clerkId: userId });
     
     if (existingUser) {
       // Update existing user
-      existingUser.email = email;
-      existingUser.firstName = firstName;
-      existingUser.lastName = lastName;
+      if (email) existingUser.email = email;
+      if (firstName) existingUser.firstName = firstName;
+      if (lastName) existingUser.lastName = lastName;
+      if (imageUrl) existingUser.profileImageUrl = imageUrl;
+      existingUser.lastLoginAt = new Date();
+      existingUser.loginCount = (existingUser.loginCount || 0) + 1;
       existingUser.updatedAt = new Date();
       await existingUser.save();
       
@@ -31,9 +34,12 @@ export async function POST(request: NextRequest) {
       // Create new user
       const newUser = new User({
         clerkId: userId,
-        email,
-        firstName,
-        lastName,
+        email: email || 'unknown@example.com',
+        firstName: firstName || 'Unknown',
+        lastName: lastName || 'User',
+        profileImageUrl: imageUrl,
+        loginCount: 1,
+        lastLoginAt: new Date(),
       });
       
       await newUser.save();
