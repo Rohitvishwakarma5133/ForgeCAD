@@ -120,3 +120,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide Clerk development mode banner */
+.cl-devModeWarning,
+.cl-internal-b3fm6y,
+[data-clerk-dev-notice] {
+  display: none !important;
+}
+
+/* Hide any Clerk development notifications that might appear */
+.clerk-tooltip {
+  display: none !important;
+}
