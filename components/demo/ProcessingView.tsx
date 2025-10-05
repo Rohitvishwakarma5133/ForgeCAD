@@ -75,7 +75,8 @@ export default function ProcessingView({ filename, conversionId, onComplete, onE
     if (!conversionId) return;
 
     try {
-      const response = await fetch(`/api/status/${conversionId}`);
+      // Pass filename as query parameter for proper mock result generation
+      const response = await fetch(`/api/status/${conversionId}?filename=${encodeURIComponent(filename)}`);
       const data = await response.json();
       
       if (!response.ok) {

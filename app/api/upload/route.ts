@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/mongodb';
 import { Conversion, User } from '@/lib/models';
-import { generateMockResult } from '@/lib/mockData';
+import { analysisEngine } from '@/lib/analysisEngine';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate a mock result for demo purposes
-    const result = generateMockResult(file.name);
+    // Generate a unique conversion ID
+    const conversionId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // If user is authenticated, save to database
     if (userId) {
@@ -63,12 +63,23 @@ export async function POST(request: NextRequest) {
         fileType: file.type,
         status: 'processing',
         forgeData: {
-          bucketKey: result.conversionId, // Use mock ID for now
+          bucketKey: conversionId,
           objectName: file.name,
         }
       });
       
       await conversion.save();
+      
+      // Start real-time analysis processing asynchronously
+      analysisEngine.processFile(
+        conversion._id.toString(),
+        file,
+        file.name,
+        file.type,
+        file.size
+      ).catch(error => {
+        console.error('Analysis processing failed:', error);
+      });
       
       // Return the database conversion ID
       return NextResponse.json({
@@ -83,11 +94,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // For non-authenticated users, return mock result
+    // For non-authenticated users, start processing with temporary ID
+    analysisEngine.processFile(
+      conversionId,
+      file,
+      file.name,
+      file.type,
+      file.size
+    ).catch(error => {
+      console.error('Analysis processing failed for guest user:', error);
+    });
+    
     return NextResponse.json({
-      conversionId: result.conversionId,
-      filename: result.filename,
-      type: drawingType || result.type,
+      conversionId: conversionId,
+      filename: file.name,
+      type: drawingType || file.type,
       status: 'processing',
       projectName,
       priority,

@@ -65,7 +65,7 @@ export default function Features() {
               <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
                 Start Free Trial
               </button>
-              <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors">
+              <button className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 hover:text-white transition-colors bg-transparent">
                 Schedule Demo
               </button>
             </div>

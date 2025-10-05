@@ -16,24 +16,22 @@ export default function DemoPage() {
   const [result, setResult] = useState<any>(null);
 
   const handleFileUpload = (uploadResult: any) => {
-    // Always use Moore Industries filename for demo consistency
-    const mooreFilename = '531_CAD_Drawing_Moore_Industries.dwg';
-    
     if (uploadResult instanceof File) {
-      setUploadedFile(mooreFilename);
-      setConversionId(`moore_upload_${Date.now()}`);
+      // Use the actual filename from the uploaded file
+      setUploadedFile(uploadResult.name);
+      setConversionId(`demo_upload_${Date.now()}`);
     } else {
-      setUploadedFile(mooreFilename);
+      // Use the filename from the upload response
+      setUploadedFile(uploadResult.filename || 'Unknown File');
       setConversionId(uploadResult.conversionId);
     }
     setState('processing');
   };
 
   const handleSampleLoad = (sampleName: string) => {
-    // Always use the Moore Industries filename for demo consistency
-    const mooreFilename = '531_CAD_Drawing_Moore_Industries.dwg';
-    setUploadedFile(mooreFilename);
-    setConversionId(`moore_sample_${Date.now()}`);
+    // Use the actual sample name selected by the user
+    setUploadedFile(sampleName + '.pdf'); // Add extension for demo purposes
+    setConversionId(`demo_sample_${Date.now()}`);
     setState('processing');
   };
 

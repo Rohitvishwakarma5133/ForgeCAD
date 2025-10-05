@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "test:validation": "tsx scripts/run-validation-tests.ts",
-    "validation:demo": "tsx lib/validation/example-usage.ts"
+    "validation:demo": "tsx lib/validation/example-usage.ts",
+    "deploy": "node deploy.js",
+    "deploy:vercel": "vercel --prod",
+    "deploy:preview": "vercel",
+    "build:analyze": "npm run build -- --analyze",
+    "precommit": "npm run lint && npm run build"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.2",
@@ -27,10 +32,12 @@
     "lucide-react": "^0.544.0",
     "mongoose": "^8.19.0",
     "next": "15.5.4",
+    "pdfjs-dist": "^5.4.149",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.63.0",
+    "sharp": "^0.34.4",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.1.11"
   },

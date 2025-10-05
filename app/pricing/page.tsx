@@ -40,7 +40,7 @@ export default function PricingPage() {
 
   const calculateSavings = () => {
     const currentAnnualCost = roiDrawings * roiCurrentCost;
-    const cadlyAnnualCost = roiDrawings * 15; // Average CADly cost per drawing
+    const cadlyAnnualCost = roiDrawings * 2; // CADly cost per drawing is now $2
     const savings = currentAnnualCost - cadlyAnnualCost;
     const savingsPercent = Math.round((savings / currentAnnualCost) * 100);
     return { savings, savingsPercent, currentAnnualCost, cadlyAnnualCost };
@@ -142,7 +142,7 @@ export default function PricingPage() {
                     <div className="bg-gray-50 rounded-lg p-4 mb-6">
                       {tier.id === 'pay-per-drawing' && (
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600 mb-1">$10-25</div>
+                          <div className="text-2xl font-bold text-blue-600 mb-1">$2</div>
                           <div className="text-sm text-gray-600">per drawing</div>
                         </div>
                       )}
@@ -153,7 +153,7 @@ export default function PricingPage() {
                             <div className="text-xs text-gray-600">drawings/month</div>
                           </div>
                           <div>
-                            <div className="text-xl font-bold text-green-600">$5</div>
+                            <div className="text-xl font-bold text-green-600">$2</div>
                             <div className="text-xs text-gray-600">additional</div>
                           </div>
                         </div>
@@ -185,7 +185,7 @@ export default function PricingPage() {
                           </Button>
                         </Link>
                       ) : (
-                        <Link href="/demo">
+                        <Link href="/converter">
                           <Button 
                             className={`w-full ${isPopular ? 'bg-gradient-to-r from-blue-600 to-purple-600' : ''}`}
                             variant={isPopular ? 'default' : 'outline'}
@@ -389,7 +389,7 @@ export default function PricingPage() {
               },
               {
                 question: "What if I exceed my monthly limit?",
-                answer: "Additional drawings are charged at $5 each for Professional plans. Enterprise plans have unlimited usage."
+                answer: "Additional drawings are charged at $2 each for Professional plans. Enterprise plans have unlimited usage."
               },
               {
                 question: "Do you offer refunds?",
@@ -425,7 +425,7 @@ export default function PricingPage() {
                 Join thousands of engineers who have already transformed their workflow with CADly.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/demo">
+                <Link href="/converter">
                   <Button size="lg" className="px-8">
                     Start Free Trial
                     <ArrowRight className="ml-2 h-5 w-5" />

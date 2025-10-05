@@ -14,7 +14,7 @@ export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 export const NAVIGATION_ITEMS = [
   { name: 'Features', href: '/features' },
   { name: 'Pricing', href: '/pricing' },
-  { name: 'Demo', href: '/demo' },
+  { name: 'Converter', href: '/converter' },
   { name: 'About', href: '/about' },
   { name: 'Contact', href: '/contact' },
 ];
@@ -30,12 +30,12 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     id: 'pay-per-drawing',
     name: 'Pay-Per-Drawing',
-    price: 10,
+    price: 2,
     period: 'per-drawing',
     features: [
-      'Simple drawings from $10',
-      'Complex drawings up to $25',
+      'All drawings just $2 each',
       'No subscription required',
+      'Pay only for what you use',
       '48-hour processing',
       'Email delivery',
       'Basic support'
@@ -49,11 +49,11 @@ export const PRICING_TIERS: PricingTier[] = [
   {
     id: 'professional',
     name: 'Professional',
-    price: 499,
+    price: 199,
     period: 'monthly',
     features: [
       '100 drawings included',
-      '$5 per additional drawing',
+      '$2 per additional drawing',
       '4-hour priority SLA',
       'API access',
       'Batch upload',

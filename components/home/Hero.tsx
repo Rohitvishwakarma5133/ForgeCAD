@@ -30,7 +30,7 @@ export default function Hero() {
               into structured CAD files in minutes, not hours
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link href="/demo">
+              <Link href="/converter">
                 <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold">
                   Try Free Demo <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -38,7 +38,7 @@ export default function Hero() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white text-white hover:bg-white/10 font-semibold"
+                className="border-white text-white hover:bg-white/10 hover:text-white font-semibold bg-transparent"
                 onClick={() => setShowVideo(true)}
               >
                 <Play className="mr-2 h-5 w-5" /> Watch Video
@@ -144,7 +144,7 @@ export default function Hero() {
                 </div>
               </div>
               <div className="flex gap-4 justify-center">
-                <Link href="/demo">
+                <Link href="/converter">
                   <Button onClick={() => setShowVideo(false)}>
                     Try Interactive Demo
                   </Button>

@@ -41,8 +41,8 @@ export default function Navbar() {
 
           {/* CTA Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/demo">
-              <Button variant="outline">Try Demo</Button>
+            <Link href="/converter">
+              <Button variant="outline">Try Converter</Button>
             </Link>
             <SignedOut>
               <SignInButton>
@@ -92,9 +92,9 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-4 border-t space-y-2">
-                <Link href="/demo" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/converter" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
-                    Try Demo
+                    Try Converter
                   </Button>
                 </Link>
                 <SignedOut>

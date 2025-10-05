@@ -365,7 +365,7 @@ export default function AboutPage() {
                 with CADly's AI-powered conversion platform.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/demo">
+                <Link href="/converter">
                   <Button size="lg" className="px-8">
                     Try Free Demo
                     <ArrowRight className="ml-2 h-5 w-5" />

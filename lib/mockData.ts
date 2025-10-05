@@ -279,33 +279,29 @@ export const mooreIndustriesInstrumentation = [
 ];
 
 export const generateMockResult = (filename: string) => {
-  // Determine if this is the Moore Industries file
-  const isMooreIndustries = filename.toLowerCase().includes('moore') || 
-                           filename.toLowerCase().includes('531_cad_drawing') ||
-                           filename.toLowerCase().includes('demo');
+  // Determine file type and characteristics based on filename
+  const fileName = filename.toLowerCase();
   
-  if (isMooreIndustries) {
-    // Return INDUSTRIAL-SCALE analysis results for Moore Industries drawing
-    const totalEquipment = mooreIndustriesEquipment.length; // 47+ major equipment items
-    const totalInstruments = mooreIndustriesInstrumentation.length; // 65+ instruments
-    
-    // Calculate advanced metrics
-    const totalConnections = 127; // Complex industrial piping network
+  // Moore Industries - Industrial Scale P&ID
+  if (fileName.includes('moore') || fileName.includes('531_cad_drawing')) {
+    const totalEquipment = mooreIndustriesEquipment.length;
+    const totalInstruments = mooreIndustriesInstrumentation.length;
+    const totalConnections = 127;
     const safetyInstruments = mooreIndustriesInstrumentation.filter(inst => inst.SIL_Rating).length;
     const advancedAnalyzers = mooreIndustriesInstrumentation.filter(inst => inst.type.includes('Chromatograph') || inst.type.includes('Analyzer')).length;
     
     return {
       conversionId: `moore_industrial_${Date.now()}`,
-      filename: '531_CAD_Drawing_Moore_Industries.dwg',
+      filename,
       type: 'P&ID' as const,
       status: 'completed' as const,
-      confidence: 0.967, // SUPERIOR engineering-grade confidence
-      processingTime: 324, // Extended processing time for complex analysis
-      equipmentCount: totalEquipment, // INDUSTRIAL SCALE: 47+ equipment items
-      pipeCount: totalConnections, // COMPLEX: 127 pipe segments and connections
-      instrumentCount: totalInstruments, // COMPREHENSIVE: 65+ instruments
-      safetyInstrumentedSystems: safetyInstruments, // SIL-rated safety systems
-      advancedAnalyzers: advancedAnalyzers, // Process analyzers and GCs
+      confidence: 0.967,
+      processingTime: 324,
+      equipmentCount: totalEquipment,
+      pipeCount: totalConnections,
+      instrumentCount: totalInstruments,
+      safetyInstrumentedSystems: safetyInstruments,
+      advancedAnalyzers: advancedAnalyzers,
       createdAt: new Date(),
       updatedAt: new Date(),
       equipment: mooreIndustriesEquipment,
@@ -313,20 +309,121 @@ export const generateMockResult = (filename: string) => {
     };
   }
   
-  // Fallback for other files
-  const types = ['P&ID', 'Electrical', 'Mechanical', 'Structural', 'Other'];
-  const randomType = types[Math.floor(Math.random() * types.length)] as any;
+  // Electrical drawings
+  if (fileName.includes('electrical') || fileName.includes('power') || fileName.includes('schematic')) {
+    return {
+      conversionId: `electrical_${Date.now()}`,
+      filename,
+      type: 'Electrical' as const,
+      status: 'completed' as const,
+      confidence: 0.92 + Math.random() * 0.06,
+      processingTime: 140 + Math.floor(Math.random() * 60),
+      equipmentCount: 25 + Math.floor(Math.random() * 30), // Motors, panels, transformers
+      instrumentCount: 15 + Math.floor(Math.random() * 25), // Meters, relays, switches
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+  
+  // Mechanical drawings
+  if (fileName.includes('mechanical') || fileName.includes('hvac') || fileName.includes('layout')) {
+    return {
+      conversionId: `mechanical_${Date.now()}`,
+      filename,
+      type: 'Mechanical' as const,
+      status: 'completed' as const,
+      confidence: 0.88 + Math.random() * 0.08,
+      processingTime: 180 + Math.floor(Math.random() * 80),
+      equipmentCount: 18 + Math.floor(Math.random() * 25), // HVAC units, ducts, fans
+      instrumentCount: 8 + Math.floor(Math.random() * 15), // Thermostats, dampers
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+  
+  // Process & Instrumentation Diagrams
+  if (fileName.includes('pid') || fileName.includes('p&id') || fileName.includes('process')) {
+    return {
+      conversionId: `pid_${Date.now()}`,
+      filename,
+      type: 'P&ID' as const,
+      status: 'completed' as const,
+      confidence: 0.94 + Math.random() * 0.05,
+      processingTime: 210 + Math.floor(Math.random() * 120),
+      equipmentCount: 30 + Math.floor(Math.random() * 40), // Vessels, pumps, exchangers
+      pipeCount: 80 + Math.floor(Math.random() * 150), // Pipe connections
+      instrumentCount: 25 + Math.floor(Math.random() * 35), // Control instruments
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+  
+  // Piping drawings
+  if (fileName.includes('piping') || fileName.includes('isometric') || fileName.includes('pipe')) {
+    return {
+      conversionId: `piping_${Date.now()}`,
+      filename,
+      type: 'Piping' as const,
+      status: 'completed' as const,
+      confidence: 0.90 + Math.random() * 0.08,
+      processingTime: 160 + Math.floor(Math.random() * 90),
+      equipmentCount: 12 + Math.floor(Math.random() * 20), // Valves, fittings
+      pipeCount: 60 + Math.floor(Math.random() * 100), // Pipe segments
+      instrumentCount: 5 + Math.floor(Math.random() * 15), // Flow meters, gauges
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+  
+  // Structural drawings
+  if (fileName.includes('structural') || fileName.includes('foundation') || fileName.includes('steel')) {
+    return {
+      conversionId: `structural_${Date.now()}`,
+      filename,
+      type: 'Structural' as const,
+      status: 'completed' as const,
+      confidence: 0.85 + Math.random() * 0.10,
+      processingTime: 200 + Math.floor(Math.random() * 100),
+      equipmentCount: 35 + Math.floor(Math.random() * 50), // Beams, columns, connections
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+  
+  // Sample drawings
+  if (fileName.includes('sample')) {
+    const sampleTypes = ['P&ID', 'Electrical', 'Mechanical', 'Structural'] as const;
+    const randomType = sampleTypes[Math.floor(Math.random() * sampleTypes.length)];
+    
+    return {
+      conversionId: `sample_${Date.now()}`,
+      filename,
+      type: randomType,
+      status: 'completed' as const,
+      confidence: 0.89 + Math.random() * 0.09,
+      processingTime: 150 + Math.floor(Math.random() * 80),
+      equipmentCount: 20 + Math.floor(Math.random() * 30),
+      pipeCount: randomType === 'P&ID' ? 40 + Math.floor(Math.random() * 80) : undefined,
+      instrumentCount: randomType !== 'Structural' ? 10 + Math.floor(Math.random() * 20) : undefined,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+  
+  // Default fallback for unknown file types
+  const types = ['P&ID', 'Electrical', 'Mechanical', 'Structural', 'Other'] as const;
+  const randomType = types[Math.floor(Math.random() * types.length)];
   
   return {
-    conversionId: `demo_${Date.now()}`,
+    conversionId: `general_${Date.now()}`,
     filename,
     type: randomType,
     status: 'completed' as const,
-    confidence: 0.85 + Math.random() * 0.15,
-    processingTime: 120 + Math.floor(Math.random() * 300),
-    equipmentCount: 15 + Math.floor(Math.random() * 50),
-    pipeCount: randomType === 'P&ID' ? 50 + Math.floor(Math.random() * 200) : undefined,
-    instrumentCount: randomType === 'P&ID' ? 10 + Math.floor(Math.random() * 40) : undefined,
+    confidence: 0.82 + Math.random() * 0.15,
+    processingTime: 120 + Math.floor(Math.random() * 180),
+    equipmentCount: 15 + Math.floor(Math.random() * 40),
+    pipeCount: randomType === 'P&ID' ? 30 + Math.floor(Math.random() * 100) : undefined,
+    instrumentCount: randomType !== 'Structural' ? 8 + Math.floor(Math.random() * 25) : undefined,
     createdAt: new Date(),
     updatedAt: new Date()
   };

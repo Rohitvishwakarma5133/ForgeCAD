@@ -351,13 +351,13 @@ export default function FeaturesPage() {
               and see why leading engineering teams trust CADly.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/demo">
+                <Link href="/converter">
                 <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-8">
                   Start Free Trial
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 hover:text-white px-8 bg-transparent">
                   Contact Sales
                 </Button>
               </Link>
