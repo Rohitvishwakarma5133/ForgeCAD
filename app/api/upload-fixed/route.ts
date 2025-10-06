@@ -27,7 +27,7 @@ async function saveJobToStorage(conversionId: string, jobData: any) {
     await mongoJobStorage.setJob(conversionId, jobData);
     console.log('✅ Job saved to MongoDB');
     return 'mongodb';
-  } catch (error: any) {
+  } catch (error) {
     console.warn('⚠️ MongoDB unavailable, using memory storage:', error.message);
     // Fallback to memory storage
     mockJobStorage.set(conversionId, jobData);
@@ -225,7 +225,7 @@ async function processInBackground(conversionId: string, file: File, storageType
       status: 'failed',
       progress: 0,
       message: 'Processing failed',
-      error: (error as Error).message,
+      error: error.message,
       updatedAt: new Date()
     };
     

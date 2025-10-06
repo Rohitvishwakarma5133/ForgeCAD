@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server';
 import { checkMongoDBConnection } from '@/lib/mongodb';
 import { mongoJobStorage } from '@/lib/mongodb-job-storage';
+import { testMongoConnection } from '@/lib/simple-mongodb';
 
 export async function GET() {
   try {
+    // Test simple MongoDB connection first
+    const simpleTest = await testMongoConnection();
+    
     // Check MongoDB connection
     const connectionStatus = await checkMongoDBConnection();
     
     // Check if storage service is healthy
-    const storageHealthy = await mongoJobStorage.isHealthy();
+    let storageHealthy = false;
+    try {
+      storageHealthy = await mongoJobStorage.isHealthy();
+    } catch (error) {
+      console.error('Storage health check failed:', error);
+    }
     
     // Get job statistics
     const jobStats = await mongoJobStorage.getJobStats();
     const totalJobs = await mongoJobStorage.getAllJobIds();
     
     return NextResponse.json({
-      status: 'healthy',
+      status: simpleTest.connected ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       database: {
+        simpleConnection: simpleTest,
         connection: connectionStatus,
         storage: {
           healthy: storageHealthy,

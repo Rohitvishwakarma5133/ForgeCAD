@@ -40,6 +40,16 @@ export const connectToMongoDB = async () => {
   try {
     await mongoose.connect(uri, {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      minPoolSize: 1,
+      maxIdleTimeMS: 30000,
+      // SSL/TLS configuration for production
+      ssl: true,
+      sslValidate: true,
+      retryWrites: true,
+      w: 'majority'
     });
     isConnected = true;
     console.log('✅ Connected to MongoDB via Mongoose');

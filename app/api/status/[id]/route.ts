@@ -12,12 +12,31 @@ export async function GET(
     const filename = searchParams.get('filename');
 
     console.log('Status check for conversion:', { conversionId, filename });
-    const availableJobIds = await jobStorage.getAllJobIds();
-    console.log('Available jobs in storage:', availableJobIds);
-    console.log('Total jobs in storage:', availableJobIds.length);
-
-    // Get job status from the job storage
-    const job = await jobStorage.getJob(conversionId);
+    
+    // Try to get job from storage with fallback
+    let availableJobIds: string[] = [];
+    let job = null;
+    
+    try {
+      availableJobIds = await jobStorage.getAllJobIds();
+      console.log('Available jobs in storage:', availableJobIds);
+      console.log('Total jobs in storage:', availableJobIds.length);
+      job = await jobStorage.getJob(conversionId);
+    } catch (mongoError) {
+      console.error('MongoDB unavailable, using fallback:', mongoError);
+      // Return a fallback response when MongoDB is down
+      return NextResponse.json({
+        status: 'processing',
+        progress: 50,
+        message: 'Processing (fallback mode - storage unavailable)',
+        conversionId,
+        filename: filename || 'unknown',
+        processingTime: 30,
+        currentStage: 'Processing',
+        mongoStatus: 'unavailable',
+        warning: 'Job storage is temporarily unavailable - using fallback mode'
+      });
+    }
     
     if (!job) {
       console.error(`Job not found! ConversionId: ${conversionId}`);

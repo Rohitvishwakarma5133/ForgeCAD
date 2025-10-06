@@ -5,9 +5,10 @@
   "installCommand": "npm install",
   "functions": {
     "app/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   },
+  "regions": ["iad1"],
   "redirects": [
     {
       "source": "/demo",
