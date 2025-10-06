@@ -266,16 +266,20 @@ async function generateCSVContent(analysisResult: any, conversionId: string): Pr
 }
 
 async function generateExcelContent(analysisResult: any, conversionId: string): Promise<Buffer> {
-  const XLSX = require('xlsx');
+  const ExcelJS = require('exceljs');
   
   const equipment = analysisResult.elements?.equipment || [];
   const instrumentation = analysisResult.elements?.instrumentation || [];
   const piping = analysisResult.elements?.piping || [];
   
   // Create a new workbook
-  const workbook = XLSX.utils.book_new();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'CADly AI Analysis Engine';
+  workbook.created = new Date();
   
   // 1. Summary Sheet
+  const summarySheet = workbook.addWorksheet('Summary');
+  
   const summaryData = [
     ['CADly AI + OCR Analysis Report'],
     [''],
@@ -305,10 +309,16 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
     ['Items Needing Review', analysisResult.qualityMetrics?.itemsNeedingReview || 0]
   ];
   
-  const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+  // Add data to summary sheet
+  summaryData.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      summarySheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
+    });
+  });
   
   // 2. Equipment Sheet
+  const equipmentSheet = workbook.addWorksheet('Equipment');
+  
   const equipmentData = [
     ['Equipment Inventory'],
     [''],
@@ -330,10 +340,16 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
     ]);
   });
   
-  const equipmentSheet = XLSX.utils.aoa_to_sheet(equipmentData);
-  XLSX.utils.book_append_sheet(workbook, equipmentSheet, 'Equipment');
+  // Add data to equipment sheet
+  equipmentData.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      equipmentSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
+    });
+  });
   
   // 3. Instrumentation Sheet
+  const instrumentationSheet = workbook.addWorksheet('Instrumentation');
+  
   const instrumentationData = [
     ['Instrumentation Devices'],
     [''],
@@ -357,10 +373,16 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
     ]);
   });
   
-  const instrumentationSheet = XLSX.utils.aoa_to_sheet(instrumentationData);
-  XLSX.utils.book_append_sheet(workbook, instrumentationSheet, 'Instrumentation');
+  // Add data to instrumentation sheet
+  instrumentationData.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      instrumentationSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
+    });
+  });
   
   // 4. Piping Systems Sheet
+  const pipingSheet = workbook.addWorksheet('Piping Systems');
+  
   const pipingData = [
     ['Piping Systems'],
     [''],
@@ -382,11 +404,17 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
     ]);
   });
   
-  const pipingSheet = XLSX.utils.aoa_to_sheet(pipingData);
-  XLSX.utils.book_append_sheet(workbook, pipingSheet, 'Piping Systems');
+  // Add data to piping sheet
+  pipingData.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      pipingSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
+    });
+  });
   
   // 5. OCR Text Sheet (if available)
   if (analysisResult.ocrText) {
+    const ocrSheet = workbook.addWorksheet('OCR Text');
+    
     const ocrData = [
       ['OCR Extracted Text'],
       [''],
@@ -396,12 +424,18 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
       [analysisResult.ocrText]
     ];
     
-    const ocrSheet = XLSX.utils.aoa_to_sheet(ocrData);
-    XLSX.utils.book_append_sheet(workbook, ocrSheet, 'OCR Text');
+    // Add data to OCR sheet
+    ocrData.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        ocrSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
+      });
+    });
   }
   
   // 6. Process Analysis Sheet (if available)
   if (analysisResult.processAnalysis) {
+    const processSheet = workbook.addWorksheet('Process Analysis');
+    
     const processData = [
       ['Process Analysis'],
       [''],
@@ -423,12 +457,16 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
       ...analysisResult.processAnalysis.fluidTypes.map((fluid: string) => [fluid])
     ];
     
-    const processSheet = XLSX.utils.aoa_to_sheet(processData);
-    XLSX.utils.book_append_sheet(workbook, processSheet, 'Process Analysis');
+    // Add data to process analysis sheet
+    processData.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        processSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
+      });
+    });
   }
   
   // Generate Excel file buffer
-  const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-  return excelBuffer;
+  const excelBuffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(excelBuffer);
 }
 

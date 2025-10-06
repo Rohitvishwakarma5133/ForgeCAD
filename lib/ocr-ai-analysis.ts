@@ -6,6 +6,7 @@ import * as path from 'path';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { v4 as uuidv4 } from 'uuid';
 import { createCanvas } from 'canvas';
+import { CADParser } from './cad-parser';
 
 // Types for the AI analysis result
 export interface AIAnalysisResult {
@@ -97,6 +98,7 @@ export interface PipingSystem {
   connections: string[];
   insulationType?: string;
   heatTracing?: boolean;
+  specifications?: Record<string, any>;
 }
 
 export interface TextElement {
@@ -222,6 +224,7 @@ export class OCRAIAnalysisService {
   private openai: OpenAI;
   private uploadDir: string;
   private resultsDir: string;
+  private cadParser: CADParser;
 
   constructor() {
     this.openai = new OpenAI({
@@ -229,6 +232,7 @@ export class OCRAIAnalysisService {
     });
     this.uploadDir = path.join(process.cwd(), 'uploads');
     this.resultsDir = path.join(process.cwd(), 'analysis-results');
+    this.cadParser = new CADParser();
     this.ensureDirectories();
   }
 
@@ -256,9 +260,44 @@ export class OCRAIAnalysisService {
         console.log('📄 Extracting text directly from PDF...');
         ocrText = await this.extractPDFText(filePath);
       } else if (fileExtension === '.dwg' || fileExtension === '.dxf') {
-        // Step 1: Direct CAD analysis (no OCR needed)
-        console.log('🔧 Analyzing CAD file directly...');
-        ocrText = await this.extractCADData(filePath);
+        // Step 1: Direct CAD analysis using real parser
+        console.log('🔧 Analyzing CAD file with real parser...');
+        const cadResult = await this.cadParser.parseCADFile(filePath);
+        
+        // Convert CAD result to expected format
+        const result: AIAnalysisResult = {
+          conversionId,
+          filename,
+          documentType: cadResult.documentType,
+          confidence: cadResult.confidence,
+          processingTime: Math.round((Date.now() - startTime) / 1000),
+          ocrText: this.generateOCRTextFromCAD(cadResult),
+          elements: cadResult.elements,
+          statistics: {
+            totalElements: cadResult.metadata.totalEntities,
+            equipmentCount: cadResult.elements.equipment.length,
+            instrumentCount: cadResult.elements.instrumentation.length,
+            pipeCount: cadResult.elements.piping.length,
+            textCount: cadResult.elements.text.length,
+            dimensionCount: cadResult.elements.dimensions.length,
+            layerCount: cadResult.metadata.layerCount,
+            drawingArea: {
+              width: (cadResult.metadata.drawingBounds.maxX && cadResult.metadata.drawingBounds.minX) 
+                ? cadResult.metadata.drawingBounds.maxX - cadResult.metadata.drawingBounds.minX 
+                : 1000,
+              height: (cadResult.metadata.drawingBounds.maxY && cadResult.metadata.drawingBounds.minY)
+                ? cadResult.metadata.drawingBounds.maxY - cadResult.metadata.drawingBounds.minY 
+                : 800
+            }
+          },
+          qualityMetrics: this.calculateQualityMetrics(cadResult.elements, cadResult.confidence),
+          processAnalysis: cadResult.processAnalysis
+        };
+        
+        // Save analysis results and return early for CAD files
+        await this.saveAnalysisResults(conversionId, result);
+        console.log(`✅ Real CAD analysis completed in ${result.processingTime}s with ${(result.confidence * 100).toFixed(1)}% confidence`);
+        return result;
       } else {
         // Step 1: Convert document to images for OCR
         console.log('📄 Converting document to images...');
@@ -782,6 +821,51 @@ export class OCRAIAnalysisService {
   private async saveAnalysisResults(conversionId: string, result: AIAnalysisResult): Promise<void> {
     const resultPath = path.join(this.resultsDir, `${conversionId}.json`);
     fs.writeFileSync(resultPath, JSON.stringify(result, null, 2));
+  }
+
+  private generateOCRTextFromCAD(cadResult: any): string {
+    // Generate text representation of CAD parsing results
+    let ocrText = `CAD ANALYSIS RESULTS\n\n`;
+    
+    ocrText += `DRAWING METADATA:\n`;
+    ocrText += `Total Entities: ${cadResult.metadata.totalEntities}\n`;
+    ocrText += `Layers: ${cadResult.metadata.layerCount}\n`;
+    ocrText += `Drawing Bounds: ${cadResult.metadata.drawingBounds.minX},${cadResult.metadata.drawingBounds.minY} to ${cadResult.metadata.drawingBounds.maxX},${cadResult.metadata.drawingBounds.maxY}\n`;
+    ocrText += `Units: ${cadResult.metadata.units}\n\n`;
+    
+    if (cadResult.elements.equipment.length > 0) {
+      ocrText += `EQUIPMENT DETECTED:\n`;
+      cadResult.elements.equipment.forEach((eq: any) => {
+        ocrText += `${eq.tagNumber}: ${eq.type} at (${eq.position.x}, ${eq.position.y})\n`;
+      });
+      ocrText += `\n`;
+    }
+    
+    if (cadResult.elements.instrumentation.length > 0) {
+      ocrText += `INSTRUMENTATION DETECTED:\n`;
+      cadResult.elements.instrumentation.forEach((inst: any) => {
+        ocrText += `${inst.tagNumber}: ${inst.type} at (${inst.position.x}, ${inst.position.y})\n`;
+      });
+      ocrText += `\n`;
+    }
+    
+    if (cadResult.elements.piping.length > 0) {
+      ocrText += `PIPING SYSTEMS DETECTED:\n`;
+      cadResult.elements.piping.forEach((pipe: any) => {
+        ocrText += `${pipe.lineNumber}: ${pipe.size} ${pipe.material} line\n`;
+      });
+      ocrText += `\n`;
+    }
+    
+    if (cadResult.elements.text.length > 0) {
+      ocrText += `TEXT ELEMENTS:\n`;
+      cadResult.elements.text.forEach((text: any) => {
+        ocrText += `"${text.content}" at (${text.position.x}, ${text.position.y})\n`;
+      });
+      ocrText += `\n`;
+    }
+    
+    return ocrText;
   }
 
   private async cleanupTempFiles(imagePaths: string[]): Promise<void> {
