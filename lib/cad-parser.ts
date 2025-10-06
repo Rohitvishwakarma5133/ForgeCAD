@@ -474,8 +474,8 @@ EOF`;
     // Extract bounds for confidence calculation
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     let totalEntities = 0;
-    let layerSet = new Set<string>();
-    let entityCountByLayer = new Map<string, number>();
+    const layerSet = new Set<string>();
+    const entityCountByLayer: Record<string, number> = {};
 
     if (dxfData.entities) {
       for (const entity of dxfData.entities) {
@@ -4332,7 +4332,7 @@ EOF`;
     let nearbyTag: string | undefined;
     let equipmentType: string | undefined;
     let instrumentType: string | undefined;
-    let operatingConditions: any = {};
+    const operatingConditions: any = {};
     let range: string | undefined;
     let accuracy: string | undefined;
     let silRating: string | undefined;
@@ -5113,7 +5113,7 @@ EOF`;
     
     let detectedScale = '1:1';
     let confidence = 0;
-    let titleBlockInfo: any = {};
+    const titleBlockInfo: any = {};
     
     // Check filename for scale hints
     const fileScaleMatch = fileName.match(/(\d+)[-_](\d+)/i);

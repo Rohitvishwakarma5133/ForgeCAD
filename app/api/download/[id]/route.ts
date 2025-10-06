@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFReportGenerator } from '@/lib/pdf-report-generator';
-import { jobStorage } from '@/lib/job-storage';
+import { mongoJobStorage as jobStorage } from '@/lib/mongodb-job-storage';
 
 const pdfReportGenerator = new PDFReportGenerator();
 
@@ -17,7 +17,7 @@ export async function GET(
     console.log('Download request:', { conversionId, format });
 
     // Get the analysis results
-    const job = jobStorage.getJob(conversionId);
+    const job = await jobStorage.getJob(conversionId);
     if (!job || job.status !== 'completed' || !job.result) {
       return NextResponse.json(
         { error: 'Analysis results not available or conversion not completed' },
@@ -272,7 +272,7 @@ async function generateCSVContent(analysisResult: any, conversionId: string): Pr
 }
 
 async function generateExcelContent(analysisResult: any, conversionId: string): Promise<Buffer> {
-  const ExcelJS = require('exceljs');
+  const ExcelJS = await import('exceljs');
   
   const equipment = analysisResult.elements?.equipment || [];
   const instrumentation = analysisResult.elements?.instrumentation || [];
@@ -465,7 +465,7 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
     
     // Add data to process analysis sheet
     processData.forEach((row, rowIndex) => {
-      row.forEach((cell, colIndex) => {
+      row.forEach((cell: any, colIndex) => {
         processSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
       });
     });

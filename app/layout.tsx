@@ -7,6 +7,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import SessionTracker from '@/components/SessionTracker';
 import HideClerkDevNotices from '@/components/HideClerkDevNotices';
 import LoadingOptimizer from '@/components/LoadingOptimizer';
+import CSSOptimizer from '@/components/CSSOptimizer';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -51,6 +52,7 @@ export default function RootLayout({
         </head>
         <body className={`${inter.variable} font-sans antialiased`}>
           <LoadingOptimizer />
+          <CSSOptimizer />
           <SessionTracker />
           <HideClerkDevNotices />
           <div className="min-h-screen flex flex-col">

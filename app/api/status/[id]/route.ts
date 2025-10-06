@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jobStorage } from '@/lib/job-storage';
+import { mongoJobStorage as jobStorage } from '@/lib/mongodb-job-storage';
 
 export async function GET(
   request: NextRequest,
@@ -12,15 +12,16 @@ export async function GET(
     const filename = searchParams.get('filename');
 
     console.log('Status check for conversion:', { conversionId, filename });
-    console.log('Available jobs in storage:', jobStorage.getAllJobIds());
-    console.log('Total jobs in storage:', jobStorage.getAllJobIds().length);
+    const availableJobIds = await jobStorage.getAllJobIds();
+    console.log('Available jobs in storage:', availableJobIds);
+    console.log('Total jobs in storage:', availableJobIds.length);
 
     // Get job status from the job storage
-    const job = jobStorage.getJob(conversionId);
+    const job = await jobStorage.getJob(conversionId);
     
     if (!job) {
       console.error(`Job not found! ConversionId: ${conversionId}`);
-      console.error('Available jobs:', jobStorage.getAllJobIds());
+      console.error('Available jobs:', availableJobIds);
       return NextResponse.json(
         { 
           status: 'error',
@@ -29,8 +30,8 @@ export async function GET(
           filename,
           debug: {
             requestedId: conversionId,
-            availableIds: jobStorage.getAllJobIds(),
-            totalJobs: jobStorage.getAllJobIds().length
+            availableIds: availableJobIds,
+            totalJobs: availableJobIds.length
           }
         },
         { status: 404 }
