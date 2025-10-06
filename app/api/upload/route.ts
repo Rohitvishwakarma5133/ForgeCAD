@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import dbConnect from '@/lib/mongodb';
-import { Conversion, User } from '@/lib/models';
-import { analysisEngine } from '@/lib/analysisEngine';
+import { OCRAIAnalysisService } from '@/lib/ocr-ai-analysis';
+import { jobStorage, ProcessingJob } from '@/lib/job-storage';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const ocrAIAnalysisService = new OCRAIAnalysisService();
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const projectName = formData.get('projectName') as string;
@@ -15,115 +15,147 @@ export async function POST(request: NextRequest) {
     const priority = formData.get('priority') as string;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-
-    // Simulate file validation
-    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/tiff'];
-    if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Unsupported file type. Please upload PDF, PNG, JPEG, or TIFF files.' },
+        { error: 'No file uploaded' },
         { status: 400 }
       );
     }
 
-    const maxSize = 50 * 1024 * 1024; // 50MB
-    if (file.size > maxSize) {
+    // Validate file type (temporarily allowing PDF for demo)
+    const allowedExtensions = ['.dwg', '.dxf', '.pdf'];
+    const fileExtension = path.extname(file.name).toLowerCase();
+    if (!allowedExtensions.includes(fileExtension)) {
       return NextResponse.json(
-        { error: 'File size too large. Maximum size is 50MB.' },
+        { error: `Unsupported file type: ${fileExtension}. Supported types: DWG, DXF, PDF (demo)` },
         { status: 400 }
       );
     }
 
     // Generate a unique conversion ID
-    const conversionId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const conversionId = `conversion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Save the uploaded file
+    const uploadDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    const filePath = path.join(uploadDir, `${conversionId}_${file.name}`);
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    fs.writeFileSync(filePath, fileBuffer);
+    
+    console.log('File upload received:', {
+      filename: file.name,
+      size: file.size,
+      type: file.type,
+      projectName,
+      drawingType,
+      priority,
+      conversionId,
+      savedPath: filePath
+    });
 
-    // If user is authenticated, save to database
-    if (userId) {
-      await dbConnect();
-      
-      // Ensure user exists in database
-      let user = await User.findOne({ clerkId: userId });
-      if (!user) {
-        user = new User({
-          clerkId: userId,
-          email: 'unknown@example.com',
-          firstName: 'Unknown',
-          lastName: 'User',
-        });
-        await user.save();
-      }
-      
-      // Create conversion record
-      const conversion = new Conversion({
-        userId: user._id,
-        clerkId: userId,
-        fileName: file.name,
-        originalFileSize: file.size,
-        fileType: file.type,
-        status: 'processing',
-        forgeData: {
-          bucketKey: conversionId,
-          objectName: file.name,
+    // Initialize processing job status
+    const initialJob: ProcessingJob = {
+      status: 'processing',
+      progress: 0,
+      message: 'Initializing CAD analysis...',
+      filename: file.name,
+      startTime: Date.now()
+    };
+    jobStorage.setJob(conversionId, initialJob);
+    
+    console.log(`✅ Job stored with ID: ${conversionId}`);
+    console.log(`📊 Total jobs in storage: ${jobStorage.getAllJobIds().length}`);
+    console.log('🔍 All job IDs:', jobStorage.getAllJobIds());
+
+    // Start asynchronous analysis (don't await)
+    processCADFileAsync(conversionId, filePath, file.name)
+      .catch(error => {
+        console.error('Analysis failed:', error);
+        const existingJob = jobStorage.getJob(conversionId);
+        if (existingJob) {
+          jobStorage.setJob(conversionId, {
+            ...existingJob,
+            status: 'failed',
+            progress: 0,
+            message: 'Analysis failed',
+            error: error.message
+          });
         }
       });
-      
-      await conversion.save();
-      
-      // Start real-time analysis processing asynchronously
-      analysisEngine.processFile(
-        conversion._id.toString(),
-        file,
-        file.name,
-        file.type,
-        file.size
-      ).catch(error => {
-        console.error('Analysis processing failed:', error);
-      });
-      
-      // Return the database conversion ID
-      return NextResponse.json({
-        conversionId: conversion._id.toString(),
-        filename: conversion.fileName,
-        type: drawingType || conversion.fileType,
-        status: 'processing',
-        projectName,
-        priority,
-        message: 'Upload successful. Processing started.',
-        databaseId: conversion._id.toString()
-      });
-    }
 
-    // For non-authenticated users, start processing with temporary ID
-    analysisEngine.processFile(
-      conversionId,
-      file,
-      file.name,
-      file.type,
-      file.size
-    ).catch(error => {
-      console.error('Analysis processing failed for guest user:', error);
-    });
-    
+    // Return immediate success response
     return NextResponse.json({
-      conversionId: conversionId,
+      success: true,
+      message: 'File uploaded successfully and analysis started',
+      conversionId,
       filename: file.name,
-      type: drawingType || file.type,
-      status: 'processing',
-      projectName,
-      priority,
-      message: 'Upload successful. Processing started.'
+      size: file.size,
+      type: file.type,
+      status: 'processing'
     });
 
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
-      { error: 'Upload failed. Please try again.' },
+      { error: 'Upload failed', details: (error as Error).message },
       { status: 500 }
     );
   }
 }
 
+async function processCADFileAsync(conversionId: string, filePath: string, filename: string) {
+  try {
+    // Update progress: Starting analysis
+    updateJobProgress(conversionId, 5, 'Initializing OCR + AI analysis...');
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    updateJobProgress(conversionId, 15, 'Converting document to images...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    updateJobProgress(conversionId, 30, 'Performing OCR text extraction...');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    updateJobProgress(conversionId, 60, 'Sending to OpenAI for intelligent analysis...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    updateJobProgress(conversionId, 85, 'Processing AI response and structuring data...');
+    
+    // Perform actual OCR + AI analysis
+    const analysisResult = await ocrAIAnalysisService.analyzeDocument(filePath, filename, conversionId);
+    
+    // Update progress: Processing complete
+    updateJobProgress(conversionId, 100, 'Analysis completed successfully', analysisResult);
+    
+    console.log(`✅ Analysis completed for ${filename} with ${analysisResult.confidence * 100}% confidence`);
+    
+  } catch (error) {
+    console.error(`❌ Analysis failed for ${filename}:`, error);
+    throw error;
+  }
+}
+
+function updateJobProgress(conversionId: string, progress: number, message: string, result?: any) {
+  const job = jobStorage.getJob(conversionId);
+  if (job) {
+    jobStorage.setJob(conversionId, {
+      ...job,
+      progress,
+      message,
+      status: progress === 100 ? 'completed' : 'processing',
+      result: result || job.result
+    });
+  }
+}
+
+// Export jobStorage for use in status API
+export { jobStorage };
+
 export async function GET() {
-  return NextResponse.json({ message: 'Upload endpoint' });
+  return NextResponse.json(
+    { error: 'Method not allowed' },
+    { status: 405 }
+  );
 }

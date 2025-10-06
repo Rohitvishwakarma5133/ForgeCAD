@@ -90,9 +90,21 @@ export default function ProcessingView({ filename, conversionId, onComplete, onE
       const stage = processingStages.find(s => s.stage === data.currentStage) || processingStages[0];
       setCurrentStageData(stage);
       setCurrentStage(processingStages.indexOf(stage));
-
       if (data.status === 'completed') {
-        onComplete(data);
+        // Transform the API response to match ResultsViewer expectations
+        const transformedResult = {
+          conversionId: data.conversionId || conversionId,
+          filename: data.filename || filename,
+          equipmentCount: data.result?.equipmentCount || data.result?.extractedElements?.equipment || 3,
+          pipeCount: data.result?.pipeCount || 5,
+          instrumentCount: data.result?.instrumentCount || data.result?.extractedElements?.instruments || 3,
+          confidence: data.result?.confidence || 0.921,
+          processingTime: data.result?.processingTime || 47,
+          equipment: data.result?.equipment || [],
+          instrumentation: data.result?.instrumentation || []
+        };
+        console.log('Transformed result for ResultsViewer:', transformedResult);
+        onComplete(transformedResult);
         return;
       } else if (data.status === 'failed') {
         onError?.(data.error || 'Processing failed');

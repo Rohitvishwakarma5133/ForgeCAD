@@ -16,22 +16,23 @@ export default function DemoPage() {
   const [result, setResult] = useState<any>(null);
 
   const handleFileUpload = (uploadResult: any) => {
-    if (uploadResult instanceof File) {
-      // Use the actual filename from the uploaded file
-      setUploadedFile(uploadResult.name);
-      setConversionId(`demo_upload_${Date.now()}`);
-    } else {
-      // Use the filename from the upload response
-      setUploadedFile(uploadResult.filename || 'Unknown File');
-      setConversionId(uploadResult.conversionId);
+    // Always expect a proper API response with conversionId
+    if (!uploadResult || !uploadResult.conversionId) {
+      console.error('Invalid upload result:', uploadResult);
+      alert('Upload failed: Invalid response from server');
+      return;
     }
+    
+    // Use the filename and conversionId from the API response
+    setUploadedFile(uploadResult.filename || 'Unknown File');
+    setConversionId(uploadResult.conversionId);
     setState('processing');
   };
 
   const handleSampleLoad = (sampleName: string) => {
     // Use the actual sample name selected by the user
     setUploadedFile(sampleName + '.pdf'); // Add extension for demo purposes
-    setConversionId(`demo_sample_${Date.now()}`);
+    setConversionId(`sample_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
     setState('processing');
   };
 
