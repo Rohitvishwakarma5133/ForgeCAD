@@ -608,13 +608,15 @@ export class OCRAIAnalysisService {
 
   private async performOCR(imagePaths: string[]): Promise<string> {
     let combinedText = '';
+    let totalConfidentChars = 0;
+    let totalChars = 0;
     
     for (let i = 0; i < imagePaths.length; i++) {
       const imagePath = imagePaths[i];
-      console.log(`🔤 Processing page ${i + 1}/${imagePaths.length}...`);
+      console.log(`🔤 Processing page ${i + 1}/${imagePaths.length} with confidence filtering...`);
       
       try {
-        const { data: { text } } = await Tesseract.recognize(imagePath, 'eng', {
+        const { data } = await Tesseract.recognize(imagePath, 'eng', {
           logger: m => {
             if (m.status === 'recognizing text') {
               console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
@@ -622,7 +624,40 @@ export class OCRAIAnalysisService {
           }
         });
         
-        combinedText += `\n--- PAGE ${i + 1} ---\n${text}\n`;
+        // Filter text based on confidence
+        let filteredText = '';
+        let pageConfidentChars = 0;
+        let pageChars = 0;
+        
+        if (data.words) {
+          data.words.forEach(word => {
+            const wordConfidence = word.confidence;
+            const wordText = word.text;
+            
+            pageChars += wordText.length;
+            
+            // Only include text with confidence >= 85%
+            if (wordConfidence >= 85) {
+              filteredText += wordText + ' ';
+              pageConfidentChars += wordText.length;
+            } else {
+              console.log(`🗑️ Filtered low-confidence word: "${wordText}" (${wordConfidence.toFixed(1)}%)`);
+            }
+          });
+        } else {
+          // Fallback if word-level confidence not available
+          filteredText = data.text;
+          pageChars = data.text.length;
+          pageConfidentChars = data.text.length; // Assume reasonable quality
+        }
+        
+        totalChars += pageChars;
+        totalConfidentChars += pageConfidentChars;
+        
+        const pageConfidenceRate = pageChars > 0 ? (pageConfidentChars / pageChars * 100) : 0;
+        console.log(`📊 Page ${i + 1} OCR quality: ${pageConfidenceRate.toFixed(1)}% (${pageConfidentChars}/${pageChars} chars)`);
+        
+        combinedText += `\n--- PAGE ${i + 1} (${pageConfidenceRate.toFixed(1)}% confident) ---\n${filteredText.trim()}\n`;
         
       } catch (error) {
         console.error(`OCR failed for page ${i + 1}:`, error);
@@ -630,7 +665,9 @@ export class OCRAIAnalysisService {
       }
     }
     
-    console.log(`🔤 OCR completed. Extracted ${combinedText.length} characters`);
+    const overallConfidenceRate = totalChars > 0 ? (totalConfidentChars / totalChars * 100) : 0;
+    console.log(`🔤 OCR completed with ${overallConfidenceRate.toFixed(1)}% confidence. Extracted ${totalConfidentChars}/${totalChars} high-quality characters`);
+    
     return combinedText;
   }
 
@@ -829,9 +866,26 @@ export class OCRAIAnalysisService {
     
     ocrText += `DRAWING METADATA:\n`;
     ocrText += `Total Entities: ${cadResult.metadata.totalEntities}\n`;
-    ocrText += `Layers: ${cadResult.metadata.layerCount}\n`;
-    ocrText += `Drawing Bounds: ${cadResult.metadata.drawingBounds.minX},${cadResult.metadata.drawingBounds.minY} to ${cadResult.metadata.drawingBounds.maxX},${cadResult.metadata.drawingBounds.maxY}\n`;
-    ocrText += `Units: ${cadResult.metadata.units}\n\n`;
+    ocrText += `Layer Count: ${cadResult.metadata.layerCount}\n`;
+    
+    // Add detailed layer information
+    if (cadResult.metadata.layers && cadResult.metadata.layers.length > 0) {
+      ocrText += `Layer Names: ${cadResult.metadata.layers.join(', ')}\n`;
+    }
+    
+    if (cadResult.metadata.entityCountByLayer) {
+      ocrText += `Entity Distribution by Layer:\n`;
+      Object.entries(cadResult.metadata.entityCountByLayer).forEach(([layer, count]) => {
+        ocrText += `  - ${layer}: ${count} entities\n`;
+      });
+    }
+    
+    // Show bounds only if they exist (not null)
+    if (cadResult.metadata.drawingBounds.minX !== null && cadResult.metadata.drawingBounds.maxX !== null) {
+      ocrText += `Drawing Bounds: ${cadResult.metadata.drawingBounds.minX.toFixed(1)},${cadResult.metadata.drawingBounds.minY.toFixed(1)} to ${cadResult.metadata.drawingBounds.maxX.toFixed(1)},${cadResult.metadata.drawingBounds.maxY.toFixed(1)}\n`;
+    }
+    
+    ocrText += `Units: ${cadResult.metadata.units || 'Not specified'}\n\n`;
     
     if (cadResult.elements.equipment.length > 0) {
       ocrText += `EQUIPMENT DETECTED:\n`;

@@ -9,6 +9,21 @@ export interface ProcessingJob {
   startTime: number;
   result?: any;
   error?: string;
+  // Global timer tracking
+  globalTimer?: {
+    startTime: number;
+    currentStage: string;
+    stageTimestamps: Record<string, number>;
+  };
+  // File intake information
+  fileIntake?: {
+    originalName: string;
+    fileSize: number;
+    fileType: string;
+    checksum: string;
+    dwgVersion?: string;
+    validationWarnings: string[];
+  };
 }
 
 class JobStorage {
