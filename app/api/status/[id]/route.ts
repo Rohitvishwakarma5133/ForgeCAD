@@ -3,11 +3,10 @@ import { mongoJobStorage as jobStorage } from '@/lib/mongodb-job-storage';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const resolvedParams = await params;
-    const conversionId = resolvedParams.id;
+    const conversionId = params.id;
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get('filename');
 
