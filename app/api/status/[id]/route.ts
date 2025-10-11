@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { mongoJobStorage as jobStorage } from '@/lib/mongodb-job-storage';
 import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {

@@ -1,8 +1,8 @@
-import { NextRequest } from 'next/server';
+import type { } from 'next/server';
 import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 import { mongoJobStorage as mongoStorage } from '@/lib/mongodb-job-storage';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   const controller = new AbortController();
   const { signal } = controller;
 
