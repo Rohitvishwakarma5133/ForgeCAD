@@ -133,16 +133,14 @@ const nextConfig = {
 
   // Typescript configuration
   typescript: {
-    // Allow production builds to complete even with TypeScript errors
-    // Only use this if you're confident in your code quality
-    ignoreBuildErrors: true,
+    // Strict TypeScript checking in production
+    ignoreBuildErrors: false,
   },
 
   // ESLint configuration
   eslint: {
-    // Allow production builds to complete even with ESLint errors
-    // Only use this if you're confident in your code quality
-    ignoreDuringBuilds: true,
+    // Strict ESLint checking in production
+    ignoreDuringBuilds: false,
   },
 
   // Logging configuration

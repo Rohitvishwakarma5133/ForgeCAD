@@ -316,7 +316,7 @@ SECTION
 2
 ENTITIES`;
 
-    const dxfEntities = [];
+    const dxfEntities: string[] = [];
     
     // Add some realistic entities based on P&ID conventions
     // Equipment (as BLOCK references or CIRCLE entities) with realistic coordinates
@@ -484,7 +484,7 @@ EOF`;
         // Track layers and entity counts
         const layer = entity.layer || '0'; // Default layer
         layerSet.add(layer);
-        entityCountByLayer.set(layer, (entityCountByLayer.get(layer) || 0) + 1);
+        entityCountByLayer[layer] = (entityCountByLayer[layer] || 0) + 1;
 
         // Update bounds
         if (entity.vertices) {
@@ -557,7 +557,7 @@ EOF`;
       layerCount,
       totalEntities,
       layers: Array.from(layerSet),
-      entityCountByLayer: Object.fromEntries(entityCountByLayer),
+      entityCountByLayer,
       drawingBounds: realBounds,
       drawingAnalysis: drawingAnalysis // Pass full drawing analysis for enhanced confidence scoring
     });
@@ -587,7 +587,7 @@ EOF`;
         },
         units: dxfData.header?.$INSUNITS?.value || null,
         layers: Array.from(layerSet),
-        entityCountByLayer: Object.fromEntries(entityCountByLayer)
+        entityCountByLayer
       }
     };
   }
@@ -686,8 +686,8 @@ EOF`;
         description: `${this.getInstrumentTypeFromPrefix(prefix)} - Extracted from CAD text`,
         position,
         confidence: 0.80,
-        range: unitSpecs.range || null,
-        accuracy: unitSpecs.accuracy || null
+        range: unitSpecs.range || undefined,
+        accuracy: unitSpecs.accuracy || undefined
       });
     }
   }
@@ -738,12 +738,12 @@ EOF`;
           radius: radius.toString(),
           layer: layer,
           detectionMethod: classification.detectionMethod,
-          multiCueScores: {
+          multiCueScores: JSON.stringify({
             geometry: geometryScore,
             layer: layerScore,
             textProximity: textScore.score
-          },
-          nearbyText: textScore.nearbyText
+          }),
+          nearbyText: Array.isArray(textScore.nearbyText) ? textScore.nearbyText.join(', ') : textScore.nearbyText || ''
         },
         connections: [],
         operatingConditions: textScore.operatingConditions
@@ -762,9 +762,9 @@ EOF`;
         description: `${instrumentType} - ${classification.detectionMethod}`,
         position,
         confidence: Math.min(0.95, classification.confidence),
-        range: textScore.range || null,
-        accuracy: textScore.accuracy || null,
-        SIL_Rating: textScore.silRating || null
+        range: textScore.range || undefined,
+        accuracy: textScore.accuracy || undefined,
+        SIL_Rating: textScore.silRating || undefined
       });
       
       console.log(`   ✅ Added instrument: ${tagNumber} (${instrumentType}) - confidence: ${classification.confidence.toFixed(2)}`);
@@ -848,15 +848,15 @@ EOF`;
       equipment.push({
         id: uuidv4(),
         tagNumber,
-        type: classification.equipmentType,
-        description: `${classification.equipmentType} - Block: ${blockName}`,
+        type: classification.equipmentType || 'Unknown Equipment',
+        description: `${classification.equipmentType || 'Unknown Equipment'} - Block: ${blockName}`,
         position,
         confidence: classification.confidence,
         specifications: {
           blockName,
           layer,
           detectionMethod: 'Block reference with attributes',
-          attributes,
+          attributes: JSON.stringify(attributes),
           ...this.parseEquipmentSpecsFromAttributes(attributes)
         },
         connections: [],
@@ -873,13 +873,13 @@ EOF`;
       instrumentation.push({
         id: uuidv4(),
         tagNumber,
-        type: classification.instrumentType,
-        description: `${classification.instrumentType} - Block: ${blockName}`,
+        type: classification.instrumentType || 'Unknown Instrument',
+        description: `${classification.instrumentType || 'Unknown Instrument'} - Block: ${blockName}`,
         position,
         confidence: classification.confidence,
-        range: attributes.RANGE || attributes.range || null,
-        accuracy: attributes.ACCURACY || attributes.accuracy || null,
-        SIL_Rating: attributes.SIL || attributes.sil_rating || null,
+        range: attributes.RANGE || attributes.range || undefined,
+        accuracy: attributes.ACCURACY || attributes.accuracy || undefined,
+        SIL_Rating: attributes.SIL || attributes.sil_rating || undefined,
         controlLoop: attributes.LOOP || attributes.control_loop,
         alarmLimits: this.parseAlarmLimitsFromAttributes(attributes)
       });
@@ -1599,7 +1599,7 @@ EOF`;
       'FN': 'Flow Nozzle',
       'FW': 'Flow Weir',
       'FB': 'Flow Bypass',
-      'FD': 'Flow Damper',
+      'FDM': 'Flow Damper',
       'FG': 'Flow Sight Glass',
       'FM': 'Flow Meter',
       'F-ORIFICE': 'Orifice Flow Meter',
@@ -1771,14 +1771,12 @@ EOF`;
       'GV': 'Gate Valve',
       'GLV': 'Globe Valve',
       'BTV': 'Butterfly Valve',
-      'PV': 'Plug Valve',
+      'PLV': 'Plug Valve',
       'NV': 'Needle Valve',
       'CV-PNEUMATIC': 'Pneumatic Control Valve',
       'CV-ELECTRIC': 'Electric Control Valve',
       'CV-HYDRAULIC': 'Hydraulic Control Valve',
       'RV': 'Relief Valve',
-      'PRV': 'Pressure Relief Valve',
-      'PSV': 'Pressure Safety Valve',
       'CSV': 'Check Valve',
       'SRV': 'Safety Relief Valve',
       'TRV': 'Temperature Relief Valve',
@@ -2575,7 +2573,7 @@ EOF`;
     
     instrumentation.forEach(inst => {
       // Find primary controlled equipment (closest)
-      let closestEquipment = null;
+      let closestEquipment: ProcessEquipment | null = null;
       let minEquipmentDistance = Infinity;
       
       equipment.forEach(eq => {
@@ -2588,19 +2586,19 @@ EOF`;
       
       if (closestEquipment) {
         // Create control relationship
-        this.addGraphEdge(graph, inst.tagNumber, closestEquipment.tagNumber, 'control', {
+        this.addGraphEdge(graph, inst.tagNumber, (closestEquipment as ProcessEquipment).tagNumber, 'control', {
           controlType: this.determineControlType(inst.type),
           distance: minEquipmentDistance,
-          controlLoop: `LOOP-${closestEquipment.tagNumber}`
+          controlLoop: `LOOP-${(closestEquipment as ProcessEquipment).tagNumber}`
         });
         
-        inst.controlLoop = `LOOP-${closestEquipment.tagNumber}`;
+        inst.controlLoop = `LOOP-${(closestEquipment as ProcessEquipment).tagNumber}`;
         controlLoopsFound++;
       }
       
       // Find associated piping for measurement instruments
       if (this.isMeasurementInstrument(inst.type)) {
-        let closestPipe = null;
+        let closestPipe: PipingSystem | null = null;
         let minPipeDistance = Infinity;
         
         piping.forEach(pipe => {
@@ -2614,7 +2612,7 @@ EOF`;
         });
         
         if (closestPipe) {
-          this.addGraphEdge(graph, inst.tagNumber, `PIPE_${closestPipe.lineNumber}`, 'measurement', {
+          this.addGraphEdge(graph, inst.tagNumber, `PIPE_${(closestPipe as PipingSystem).lineNumber}`, 'measurement', {
             measurementType: this.determineMeasurementType(inst.type),
             distance: minPipeDistance
           });
@@ -2900,8 +2898,8 @@ EOF`;
     const endPoint = pipe.path[pipe.path.length - 1];
     const proximityThreshold = 40;
     
-    let startEquipment = null;
-    let endEquipment = null;
+    let startEquipment: ProcessEquipment | null = null;
+    let endEquipment: ProcessEquipment | null = null;
     
     // Find equipment near start and end points
     equipment.forEach(eq => {
@@ -2914,8 +2912,8 @@ EOF`;
     
     if (startEquipment && endEquipment) {
       // Flow direction inference based on equipment types
-      const startType = startEquipment.type.toLowerCase();
-      const endType = endEquipment.type.toLowerCase();
+      const startType = (startEquipment as ProcessEquipment).type.toLowerCase();
+      const endType = (endEquipment as ProcessEquipment).type.toLowerCase();
       
       // Pumps typically push fluid downstream
       if (startType.includes('pump')) return 'forward';
@@ -3035,7 +3033,7 @@ EOF`;
     pipe2: PipingSystem,
     threshold: number
   ): Array<{ node1: string; node2: string; type: string; distance: number; angle?: number }> {
-    const connections = [];
+    const connections: Array<{ node1: string; node2: string; type: string; distance: number; angle?: number }> = [];
     
     if (!pipe1.path || !pipe2.path || pipe1.path.length < 2 || pipe2.path.length < 2) {
       return connections;
@@ -3163,7 +3161,7 @@ EOF`;
    */
   private identifyProcessUnits(equipment: ProcessEquipment[], graph: RelationshipGraph): any[] {
     // Group equipment by proximity and connectivity
-    const units = [];
+    const units: any[] = [];
     const processedEquipment = new Set();
     
     equipment.forEach(eq => {
@@ -3222,7 +3220,7 @@ EOF`;
    */
   private identifyFlowNetworks(piping: PipingSystem[], graph: RelationshipGraph): any[] {
     // Group piping by connectivity and material/size similarity
-    const networks = [];
+    const networks: any[] = [];
     const processedPipes = new Set();
     
     piping.forEach(pipe => {
@@ -3257,7 +3255,7 @@ EOF`;
    * Identify critical process paths
    */
   private identifyCriticalProcessPaths(graph: RelationshipGraph): any[] {
-    const criticalPaths = [];
+    const criticalPaths: any[] = [];
     
     // Find longest process flow paths
     const processFlowEdges = graph.edges.filter(edge => edge.type === 'process_flow');
@@ -3346,7 +3344,7 @@ EOF`;
    * Get piping connections
    */
   private getPipingConnections(pipeLineNumber: string, graph: RelationshipGraph): string[] {
-    const connections = [];
+    const connections: string[] = [];
     
     // Find equipment connected to this pipe
     const pipeStartNode = `${pipeLineNumber}_START`;
@@ -4825,7 +4823,7 @@ EOF`;
     let detectedScale = '1:1';
     let gridSpacing = 0;
     let titleBlockInfo = {};
-    let viewportInfo = {};
+    let viewportInfo: { scale?: string; confidence?: number } = {};
     
     // =======================================================================
     // 1. EXTRACT BOUNDS FROM DXF HEADER

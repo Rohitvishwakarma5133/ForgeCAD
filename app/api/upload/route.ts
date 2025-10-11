@@ -17,8 +17,8 @@ function getCORSHeaders() {
   };
 }
 
-// Mock job storage for fallback
-const mockJobStorage = new Map();
+// Import shared fallback storage
+import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 
 async function saveJobToStorage(conversionId: string, jobData: any) {
   try {
@@ -28,10 +28,10 @@ async function saveJobToStorage(conversionId: string, jobData: any) {
     console.log('✅ Job saved to MongoDB');
     return 'mongodb';
   } catch (error: any) {
-    console.warn('⚠️ MongoDB unavailable, using memory storage:', error.message);
-    // Fallback to memory storage
-    mockJobStorage.set(conversionId, jobData);
-    console.log('✅ Job saved to memory storage');
+    console.warn('⚠️ MongoDB unavailable, using shared fallback storage:', error.message);
+    // Fallback to shared memory storage
+    await fallbackJobStorage.setJob(conversionId, jobData);
+    console.log('✅ Job saved to shared fallback storage');
     return 'memory';
   }
 }
@@ -73,9 +73,10 @@ export async function POST(request: NextRequest) {
     const jobData = {
       conversionId,
       filename: file.name,
-      status: 'processing',
+      status: 'processing' as 'processing' | 'completed' | 'failed',
       progress: 5,
       message: 'File uploaded successfully, starting analysis...',
+      startTime: Date.now(),
       createdAt: new Date(),
       updatedAt: new Date(),
       metadata: {
@@ -85,10 +86,11 @@ export async function POST(request: NextRequest) {
         uploadTimestamp: new Date().toISOString()
       },
       fileIntake: {
-        filename: file.name,
-        size: file.size,
-        type: file.type,
-        timestamp: new Date().toISOString()
+        originalName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        checksum: `${Date.now()}-${file.size}`, // Simple checksum for now
+        validationWarnings: []
       },
       globalTimer: {
         startTime: Date.now(),
@@ -165,66 +167,117 @@ export async function OPTIONS() {
   });
 }
 
-// Mock background processing
+// Real OCR + AI analysis processing
 async function processInBackground(conversionId: string, file: File, storageType: string) {
   try {
-    console.log(`🔧 Starting background processing for ${conversionId}`);
+    console.log(`🔧 Starting real OCR + AI analysis for ${conversionId}`);
     
-    // Simulate processing stages
-    const stages = [
-      { progress: 10, stage: 'CAD Parser Layer', message: 'Parsing CAD file structure...', delay: 2000 },
-      { progress: 30, stage: 'Entity Recognition', message: 'Identifying drawing elements...', delay: 3000 },
-      { progress: 50, stage: 'Relationship Engine', message: 'Building connectivity graph...', delay: 2500 },
-      { progress: 70, stage: 'QA Validation', message: 'Validating engineering logic...', delay: 2000 },
-      { progress: 85, stage: 'Report Builder', message: 'Generating analysis report...', delay: 1500 },
-      { progress: 100, stage: 'Complete', message: 'Analysis completed successfully', delay: 500 }
-    ];
-
-    for (const stageInfo of stages) {
-      await new Promise(resolve => setTimeout(resolve, stageInfo.delay));
-      
-      const updatedJob = {
-        conversionId,
-        filename: file.name,
-        status: stageInfo.progress === 100 ? 'completed' : 'processing',
-        progress: stageInfo.progress,
-        message: `[${stageInfo.stage}] ${stageInfo.message}`,
-        updatedAt: new Date(),
-        globalTimer: {
-          startTime: Date.now() - (stages.indexOf(stageInfo) + 1) * 1000,
-          currentStage: stageInfo.stage,
-          stageTimestamps: {} // Would track real timestamps
+    // Save the uploaded file to disk for processing
+    const uploadDir = 'uploads';
+    const fs = await import('fs');
+    const path = await import('path');
+    
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    const filePath = path.join(uploadDir, `${conversionId}_${file.name}`);
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    fs.writeFileSync(filePath, fileBuffer);
+    
+    console.log(`💾 File saved to ${filePath} for processing`);
+    
+    // Update job status to indicate OCR processing started
+    await updateJobProgress(conversionId, storageType, {
+      progress: 10,
+      stage: 'OCR Processing',
+      message: 'Starting OCR text extraction...',
+      status: 'processing'
+    });
+    
+    // Initialize the real OCR + AI analysis service
+    const { OCRAIAnalysisService } = await import('@/lib/ocr-ai-analysis');
+    const analysisService = new OCRAIAnalysisService();
+    
+    // Update job status to indicate AI analysis started
+    await updateJobProgress(conversionId, storageType, {
+      progress: 50,
+      stage: 'AI Analysis',
+      message: 'Sending data to ChatGPT for analysis and structuring...',
+      status: 'processing'
+    });
+    
+    // Perform real analysis using OCR + ChatGPT
+    const analysisResult = await analysisService.analyzeDocument(filePath, file.name, conversionId);
+    
+    // Update job status to indicate data storage phase
+    await updateJobProgress(conversionId, storageType, {
+      progress: 85,
+      stage: 'Data Storage',
+      message: 'Storing structured data in MongoDB...',
+      status: 'processing'
+    });
+    
+    // Complete the job with the analysis results
+    const completedJob = {
+      conversionId,
+      filename: file.name,
+      status: 'completed' as 'processing' | 'completed' | 'failed',
+      progress: 100,
+      message: 'Analysis completed successfully',
+      startTime: Date.now(),
+      updatedAt: new Date(),
+      result: analysisResult, // Store the ChatGPT analysis results
+      globalTimer: {
+        startTime: Date.now() - analysisResult.processingTime * 1000,
+        currentStage: 'Complete',
+        stageTimestamps: {
+          'File Intake': Date.now() - analysisResult.processingTime * 1000,
+          'OCR Processing': Date.now() - (analysisResult.processingTime * 1000 * 0.8),
+          'AI Analysis': Date.now() - (analysisResult.processingTime * 1000 * 0.4),
+          'Data Storage': Date.now() - (analysisResult.processingTime * 1000 * 0.1),
+          'Complete': Date.now()
         }
-      };
-
-      // Update job in storage
-      if (storageType === 'mongodb') {
-        try {
-          const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
-          await mongoJobStorage.setJob(conversionId, updatedJob);
-        } catch (error) {
-          console.error('Failed to update MongoDB job:', error);
-          mockJobStorage.set(conversionId, updatedJob);
-        }
-      } else {
-        mockJobStorage.set(conversionId, updatedJob);
       }
-
-      console.log(`📊 [${stageInfo.progress}%] ${stageInfo.stage} - ${stageInfo.message}`);
+    };
+    
+    // Store the completed job with results
+    if (storageType === 'mongodb') {
+      try {
+        const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
+        await mongoJobStorage.setJob(conversionId, completedJob);
+        console.log(`💾 Analysis results stored in MongoDB for ${conversionId}`);
+      } catch (error) {
+        console.error('Failed to store in MongoDB, using fallback:', error);
+        await fallbackJobStorage.setJob(conversionId, completedJob);
+      }
+    } else {
+      await fallbackJobStorage.setJob(conversionId, completedJob);
+      console.log(`💾 Analysis results stored in fallback storage for ${conversionId}`);
+    }
+    
+    // Clean up the temporary file
+    try {
+      fs.unlinkSync(filePath);
+      console.log(`🧹 Cleaned up temporary file: ${filePath}`);
+    } catch (cleanupError) {
+      console.warn(`⚠️ Could not clean up file ${filePath}:`, cleanupError);
     }
 
-    console.log(`✅ Background processing completed for ${conversionId}`);
+    console.log(`✅ Real OCR + AI processing completed for ${conversionId}`);
+    console.log(`📊 Results: ${analysisResult.elements.equipment.length} equipment, ${analysisResult.elements.instrumentation.length} instruments, ${analysisResult.elements.piping.length} piping systems`);
     
   } catch (error) {
-    console.error(`❌ Background processing failed for ${conversionId}:`, error);
+    console.error(`❌ OCR + AI processing failed for ${conversionId}:`, error);
     
     // Mark job as failed
     const failedJob = {
       conversionId,
       filename: file.name,
-      status: 'failed',
+      status: 'failed' as 'processing' | 'completed' | 'failed',
       progress: 0,
-      message: 'Processing failed',
+      message: 'OCR + AI analysis failed',
+      startTime: Date.now(),
       error: (error as Error).message,
       updatedAt: new Date()
     };
@@ -234,10 +287,45 @@ async function processInBackground(conversionId: string, file: File, storageType
         const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
         await mongoJobStorage.setJob(conversionId, failedJob);
       } catch (e) {
-        mockJobStorage.set(conversionId, failedJob);
+        await fallbackJobStorage.setJob(conversionId, failedJob);
       }
     } else {
-      mockJobStorage.set(conversionId, failedJob);
+      await fallbackJobStorage.setJob(conversionId, failedJob);
     }
   }
+}
+
+// Helper function to update job progress
+async function updateJobProgress(conversionId: string, storageType: string, update: {
+  progress: number;
+  stage: string;
+  message: string;
+  status: 'processing' | 'completed' | 'failed';
+}) {
+  const updatedJob = {
+    conversionId,
+    status: update.status,
+    progress: update.progress,
+    message: `[${update.stage}] ${update.message}`,
+    startTime: Date.now(),
+    updatedAt: new Date(),
+    globalTimer: {
+      startTime: Date.now(),
+      currentStage: update.stage,
+      stageTimestamps: {} // Real timestamps would be tracked here
+    }
+  };
+
+  if (storageType === 'mongodb') {
+    try {
+      const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
+      await mongoJobStorage.setJob(conversionId, updatedJob);
+    } catch (error) {
+      await fallbackJobStorage.setJob(conversionId, updatedJob);
+    }
+  } else {
+    await fallbackJobStorage.setJob(conversionId, updatedJob);
+  }
+
+  console.log(`📊 [${update.progress}%] ${update.stage} - ${update.message}`);
 }

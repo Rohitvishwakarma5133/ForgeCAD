@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFReportGenerator } from '@/lib/pdf-report-generator';
 import { mongoJobStorage as jobStorage } from '@/lib/mongodb-job-storage';
+import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 
 const pdfReportGenerator = new PDFReportGenerator();
 
@@ -16,14 +17,31 @@ export async function GET(
 
     console.log('Download request:', { conversionId, format });
 
-    // Get the analysis results
-    const job = await jobStorage.getJob(conversionId);
+    // Get the analysis results (try MongoDB first, then fallback storage)
+    let job = null;
+    let storageType = 'mongodb';
+    
+    try {
+      job = await jobStorage.getJob(conversionId);
+    } catch (error) {
+      console.warn('MongoDB unavailable, trying fallback storage:', error);
+      storageType = 'memory';
+      job = await fallbackJobStorage.getJob(conversionId);
+    }
+    
     if (!job || job.status !== 'completed' || !job.result) {
       return NextResponse.json(
-        { error: 'Analysis results not available or conversion not completed' },
+        { 
+          error: 'Analysis results not available or conversion not completed',
+          storageType,
+          jobStatus: job?.status,
+          hasResult: !!job?.result
+        },
         { status: 404 }
       );
     }
+    
+    console.log(`📥 Found completed job in ${storageType} storage for download`);
 
     const analysisResult = job.result;
     let content: Buffer;
@@ -465,7 +483,7 @@ async function generateExcelContent(analysisResult: any, conversionId: string): 
     
     // Add data to process analysis sheet
     processData.forEach((row, rowIndex) => {
-      row.forEach((cell: any, colIndex) => {
+      row.forEach((cell: any, colIndex: number) => {
         processSheet.getCell(rowIndex + 1, colIndex + 1).value = cell;
       });
     });

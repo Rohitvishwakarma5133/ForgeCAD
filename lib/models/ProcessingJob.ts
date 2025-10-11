@@ -14,7 +14,7 @@ interface IFileIntake {
 interface IGlobalTimer {
   startTime: number;
   currentStage: string;
-  stageTimestamps: Record<string, number>;
+  stageTimestamps: Map<string, number>;
 }
 
 // Interface for the ProcessingJob document

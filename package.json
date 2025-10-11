@@ -7,11 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "setup": "node scripts/setup.js",
     "deploy:vercel": "vercel --prod",
     "deploy:preview": "vercel",
-    "build:analyze": "npm run build -- --analyze",
-    "precommit": "npm run lint && npm run build"
+    "health": "curl http://localhost:3000/api/health"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.2",

@@ -74,6 +74,7 @@ export interface Instrumentation {
   description: string;
   position: { x: number; y: number };
   confidence: number;
+  specifications?: Record<string, any>;
   SIL_Rating?: string;
   range?: string;
   accuracy?: string;
@@ -98,6 +99,7 @@ export interface PipingSystem {
   connections: string[];
   insulationType?: string;
   heatTracing?: boolean;
+  flowDirection?: string;
   specifications?: Record<string, any>;
 }
 
@@ -629,8 +631,8 @@ export class OCRAIAnalysisService {
         let pageConfidentChars = 0;
         let pageChars = 0;
         
-        if (data.words) {
-          data.words.forEach(word => {
+        if ((data as any).words) {
+          (data as any).words.forEach((word: any) => {
             const wordConfidence = word.confidence;
             const wordText = word.text;
             

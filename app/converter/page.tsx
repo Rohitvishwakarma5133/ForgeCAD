@@ -29,12 +29,6 @@ export default function DemoPage() {
     setState('processing');
   };
 
-  const handleSampleLoad = (sampleName: string) => {
-    // Use the actual sample name selected by the user
-    setUploadedFile(sampleName + '.pdf'); // Add extension for demo purposes
-    setConversionId(`sample_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
-    setState('processing');
-  };
 
   const handleProcessingComplete = (conversionResult: any) => {
     setResult(conversionResult);
@@ -135,7 +129,6 @@ export default function DemoPage() {
             >
               <FileUploader 
                 onUpload={handleFileUpload}
-                onSampleLoad={handleSampleLoad}
                 isUploading={false}
               />
             </motion.div>

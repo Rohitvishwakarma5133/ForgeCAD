@@ -75,16 +75,6 @@ export default function DashboardUploadPage() {
     }
   };
 
-  const handleSampleLoad = (sampleName: string) => {
-    if (!drawingType) {
-      setError('Please select a drawing type first');
-      return;
-    }
-    
-    setUploadedFile(sampleName);
-    setConversionId(`sample_${Date.now()}`);
-    setState('processing');
-  };
 
   const handleProcessingComplete = (conversionResult: any) => {
     setResult(conversionResult);
@@ -284,7 +274,6 @@ export default function DashboardUploadPage() {
             >
               <FileUploader 
                 onUpload={handleFileUpload}
-                onSampleLoad={handleSampleLoad}
                 isUploading={false}
               />
             </motion.div>

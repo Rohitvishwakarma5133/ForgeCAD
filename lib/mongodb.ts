@@ -47,7 +47,6 @@ export const connectToMongoDB = async () => {
       maxIdleTimeMS: 30000,
       // SSL/TLS configuration for production
       ssl: true,
-      sslValidate: true,
       retryWrites: true,
       w: 'majority'
     });

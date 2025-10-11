@@ -45,8 +45,24 @@ uploads/
 job-storage/
 analysis-results/
 
+# Deployment
 .vercel
 
-.vercel
+# Logs
+logs/
+*.log
 
-.vercel
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.bak
+*.old
+*~
+*.swp
+.cache/

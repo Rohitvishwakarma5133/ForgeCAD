@@ -60,6 +60,7 @@ export interface PipingSystem {
   connections: string[];
   insulationType?: string;
   heatTracing?: boolean;
+  flowDirection?: string;
 }
 
 export interface CADAnalysisResult {

@@ -1407,17 +1407,5 @@ export class PDFReportGenerator {
     return recommendations;
   }
 
-  private getConfidenceDescription(confidence: number): string {
-    if (confidence >= 0.95) return 'Excellent';
-    if (confidence >= 0.85) return 'Very Good';
-    if (confidence >= 0.75) return 'Good';
-    if (confidence >= 0.65) return 'Acceptable';
-    return 'Requires Review';
-  }
 
-  private formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
 }

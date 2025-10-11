@@ -2,17 +2,16 @@
 
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, X, File } from 'lucide-react';
+import { Upload, FileText, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SUPPORTED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/constants';
 
 interface FileUploaderProps {
   onUpload: (uploadResult: File | { filename: string; conversionId: string }) => void;
-  onSampleLoad: (sampleName: string) => void;
   isUploading?: boolean;
 }
 
-export default function FileUploader({ onUpload, onSampleLoad, isUploading = false }: FileUploaderProps) {
+export default function FileUploader({ onUpload, isUploading = false }: FileUploaderProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -52,8 +51,7 @@ export default function FileUploader({ onUpload, onSampleLoad, isUploading = fal
       onUpload(result); // Pass the API response instead of just the file
     } catch (error) {
       console.error('Upload error:', error);
-      // For demo purposes, still proceed with mock data
-      onUpload({ filename: file.name, conversionId: `demo_${Date.now()}` });
+      throw error; // Re-throw the error instead of using mock data
     }
   };
 
@@ -69,11 +67,6 @@ export default function FileUploader({ onUpload, onSampleLoad, isUploading = fal
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const sampleDrawings = [
-    { name: 'Sample P&ID Drawing', description: 'Process flow diagram' },
-    { name: 'Electrical Schematic', description: 'Power distribution' },
-    { name: 'Mechanical Drawing', description: 'Equipment layout' }
-  ];
 
   return (
     <div className="space-y-6">
@@ -171,30 +164,6 @@ export default function FileUploader({ onUpload, onSampleLoad, isUploading = fal
         </div>
       )}
 
-      {/* Sample Drawings */}
-      {!file && !isUploading && (
-        <div className="border-t pt-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-            Or try with a sample drawing
-          </h4>
-          <div className="grid gap-3">
-            {sampleDrawings.map((sample, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                onClick={() => onSampleLoad(sample.name)}
-                className="h-auto p-4 justify-start text-left"
-              >
-                <File className="mr-3 h-5 w-5 text-blue-600 flex-shrink-0" />
-                <div>
-                  <div className="font-medium">{sample.name}</div>
-                  <div className="text-sm text-gray-500">{sample.description}</div>
-                </div>
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

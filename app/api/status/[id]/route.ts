@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mongoJobStorage as jobStorage } from '@/lib/mongodb-job-storage';
+import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const conversionId = params.id;
+    const { id } = await params;
+    const conversionId = id;
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get('filename');
 
@@ -15,41 +17,45 @@ export async function GET(
     // Try to get job from storage with fallback
     let availableJobIds: string[] = [];
     let job = null;
+    let storageType = 'mongodb';
     
     try {
       availableJobIds = await jobStorage.getAllJobIds();
-      console.log('Available jobs in storage:', availableJobIds);
-      console.log('Total jobs in storage:', availableJobIds.length);
+      console.log('Available jobs in MongoDB:', availableJobIds);
+      console.log('Total jobs in MongoDB:', availableJobIds.length);
       job = await jobStorage.getJob(conversionId);
     } catch (mongoError) {
-      console.error('MongoDB unavailable, using fallback:', mongoError);
-      // Return a fallback response when MongoDB is down
-      return NextResponse.json({
-        status: 'processing',
-        progress: 50,
-        message: 'Processing (fallback mode - storage unavailable)',
-        conversionId,
-        filename: filename || 'unknown',
-        processingTime: 30,
-        currentStage: 'Processing',
-        mongoStatus: 'unavailable',
-        warning: 'Job storage is temporarily unavailable - using fallback mode'
-      });
+      console.error('MongoDB unavailable, checking fallback storage:', mongoError);
+      storageType = 'memory';
+      
+      // Try to get job from fallback memory storage
+      try {
+        availableJobIds = await fallbackJobStorage.getAllJobIds();
+        console.log('Available jobs in fallback storage:', availableJobIds);
+        console.log('Total jobs in fallback storage:', availableJobIds.length);
+        job = await fallbackJobStorage.getJob(conversionId);
+        console.log('Job found in fallback storage:', !!job);
+      } catch (memoryError) {
+        console.error('Fallback storage also unavailable:', memoryError);
+      }
     }
     
     if (!job) {
       console.error(`Job not found! ConversionId: ${conversionId}`);
       console.error('Available jobs:', availableJobIds);
+      console.error('Storage type:', storageType);
       return NextResponse.json(
         { 
           status: 'error',
           error: 'Conversion job not found',
           conversionId,
           filename,
+          storageType,
           debug: {
             requestedId: conversionId,
             availableIds: availableJobIds,
-            totalJobs: availableJobIds.length
+            totalJobs: availableJobIds.length,
+            storageUsed: storageType
           }
         },
         { status: 404 }
@@ -70,6 +76,8 @@ export async function GET(
         processingTime: elapsedTime,
         currentStage: job.globalTimer?.currentStage || 'Processing',
         fileIntake: job.fileIntake,
+        storageType,
+        warning: storageType === 'memory' ? 'Using fallback storage - job may not persist between sessions' : null,
         // Enhanced progress information
         progressInfo: {
           currentStage: job.globalTimer?.currentStage || 'Processing',
@@ -102,6 +110,8 @@ export async function GET(
         currentStage: 'Complete',
         fileIntake: job.fileIntake,
         stageTimestamps: job.globalTimer?.stageTimestamps,
+        storageType,
+        warning: storageType === 'memory' ? 'Using fallback storage - job may not persist between sessions' : null,
         result: {
           // Convert CADAnalysisResult to expected format
           documentType: job.result?.documentType || 'Engineering Drawing',
@@ -156,7 +166,9 @@ export async function GET(
           error: 'Analysis failed',
           details: job.error || 'Unknown error occurred',
           conversionId,
-          filename: job.filename
+          filename: job.filename,
+          storageType,
+          warning: storageType === 'memory' ? 'Using fallback storage - job may not persist between sessions' : null
         },
         { status: 500 }
       );
