@@ -59,24 +59,17 @@ export async function GET(
     }
     
     if (!job) {
-      console.error(`Job not found! ConversionId: ${conversionId}`);
-      console.error('Available jobs:', availableJobIds);
-      console.error('Storage type:', storageType);
+      console.warn(`Job not found yet (returning pending). ConversionId: ${conversionId}`);
       return NextResponse.json(
-        { 
-          status: 'error',
-          error: 'Conversion job not found',
+        {
+          status: 'pending',
+          message: 'Job not found yet. It may still be initializing or processed in another region.',
           conversionId,
           filename,
           storageType,
-          debug: {
-            requestedId: conversionId,
-            availableIds: availableJobIds,
-            totalJobs: availableJobIds.length,
-            storageUsed: storageType
-          }
+          retryAfterSeconds: 2,
         },
-        { status: 404 }
+        { status: 202 }
       );
     }
 
