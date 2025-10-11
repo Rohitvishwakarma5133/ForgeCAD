@@ -4,11 +4,10 @@ import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
-    const { id } = params;
-    const conversionId = id;
+    const conversionId = (context?.params?.id as string) || '';
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get('filename');
 

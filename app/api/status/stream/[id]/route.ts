@@ -2,12 +2,11 @@ import type { } from 'next/server';
 import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 import { mongoJobStorage as mongoStorage } from '@/lib/mongodb-job-storage';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, context: any) {
   const controller = new AbortController();
   const { signal } = controller;
 
-  const { id } = params;
-  const conversionId = id;
+  const conversionId = (context?.params?.id as string) || '';
 
   const encoder = new TextEncoder();
   let interval: NodeJS.Timeout | null = null;
