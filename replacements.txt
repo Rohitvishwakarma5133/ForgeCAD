@@ -1,0 +1,17 @@
+***REMOVED***
+regex:(?i)sk-ant-[A-Za-z0-9_\-]{20,}==>{{REDACTED_ANTHROPIC_KEY}}
+
+***REMOVED***
+regex:(?i)sk-[A-Za-z0-9_\-]{20,}==>{{REDACTED_API_KEY}}
+
+***REMOVED***
+regex:(?i)AIza[0-9A-Za-z_\-]{35}==>{{REDACTED_GOOGLE_API_KEY}}
+
+***REMOVED***
+regex:(?i)AKIA[0-9A-Z]{16}==>{{REDACTED_AWS_ACCESS_KEY_ID}}
+
+***REMOVED***
+regex:(?i)mongodb(?:\+srv)?://[^"'\s]+==>{{REDACTED_MONGODB_URI}}
+
+***REMOVED***
+regex:(?i)^(\s*[A-Z0-9_]+\s*=\s*).+$==>$1{{REDACTED}}

@@ -84,7 +84,9 @@ export default function ProcessingView({ filename, conversionId, onComplete, onE
       }
 
       setProgress(data.progress || 0);
-      setEstimatedTimeRemaining(data.estimatedTimeRemaining || 0);
+      setEstimatedTimeRemaining(
+        (data.progressInfo && data.progressInfo.estimatedTimeRemaining) || data.estimatedTimeRemaining || 0
+      );
       
       // Find the current stage based on the API response
       const stage = processingStages.find(s => s.stage === data.currentStage) || processingStages[0];
@@ -103,7 +105,7 @@ export default function ProcessingView({ filename, conversionId, onComplete, onE
           equipment: data.result?.equipment || [],
           instrumentation: data.result?.instrumentation || []
         };
-        console.log('Transformed result for ResultsViewer:', transformedResult);
+        console.log('Transformed result for ResultsViewer (polling):', transformedResult);
         onComplete(transformedResult);
         return;
       } else if (data.status === 'failed') {
@@ -117,13 +119,74 @@ export default function ProcessingView({ filename, conversionId, onComplete, onE
       console.error('Status polling error:', error);
       onError?.(error instanceof Error ? error.message : 'Failed to check conversion status');
     }
-  }, [conversionId, onComplete, onError]);
+  }, [conversionId, filename, onComplete, onError]);
 
+  // Prefer SSE streaming if available; fall back to polling
   useEffect(() => {
-    if (conversionId) {
+    if (!conversionId) return;
+
+    let es: EventSource | null = null;
+    let fellBack = false;
+
+    try {
+      es = new EventSource(`/api/status/stream/${conversionId}?filename=${encodeURIComponent(filename)}`);
+
+      es.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (!data) return;
+
+          // Update progress UI
+          setProgress(data.progress || 0);
+          const eta = data.progressInfo?.estimatedTimeRemaining ?? data.estimatedTimeRemaining ?? 0;
+          setEstimatedTimeRemaining(eta);
+
+          const stage = processingStages.find(s => s.stage === (data.currentStage || 'processing')) || processingStages[0];
+          setCurrentStageData(stage);
+          setCurrentStage(processingStages.indexOf(stage));
+
+          if (data.status === 'completed') {
+            const transformedResult = {
+              conversionId: data.conversionId || conversionId,
+              filename: data.filename || filename,
+              equipmentCount: data.result?.equipmentCount || 0,
+              pipeCount: data.result?.pipeCount || 0,
+              instrumentCount: data.result?.instrumentCount || 0,
+              confidence: data.result?.confidence || 0.9,
+              processingTime: data.processingTime || data.result?.processingTime || 0,
+              equipment: data.result?.equipment || [],
+              instrumentation: data.result?.instrumentation || []
+            };
+            console.log('Transformed result for ResultsViewer (SSE):', transformedResult);
+            onComplete(transformedResult);
+            es?.close();
+          } else if (data.status === 'failed') {
+            onError?.(data.error || 'Processing failed');
+            es?.close();
+          }
+        } catch (err) {
+          console.warn('SSE parse error, ignoring event:', err);
+        }
+      };
+
+      es.onerror = () => {
+        // Close and fall back to polling
+        try { es?.close(); } catch {}
+        if (!fellBack) {
+          fellBack = true;
+          pollConversionStatus();
+        }
+      };
+    } catch (e) {
+      console.warn('SSE not available, falling back to polling');
       pollConversionStatus();
     }
-  }, [conversionId, pollConversionStatus]);
+
+    return () => {
+      try { es?.close(); } catch {}
+    };
+  }, [conversionId, filename, pollConversionStatus, onComplete, onError]);
+  
 
   const IconComponent = currentStageData.icon;
 

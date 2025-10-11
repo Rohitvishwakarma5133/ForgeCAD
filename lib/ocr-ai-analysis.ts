@@ -704,11 +704,70 @@ export class OCRAIAnalysisService {
       
     } catch (error) {
       console.error('OpenAI API error:', error);
+
+      // Try Claude fallback if available
+      try {
+        if (process.env.ANTHROPIC_API_KEY) {
+          console.log('🔄 Falling back to Claude (Anthropic) analysis...');
+          const claudeResult = await this.performClaudeAnalysis(ocrText);
+          if (claudeResult) {
+            return claudeResult;
+          }
+        } else {
+          console.warn('Claude fallback skipped: ANTHROPIC_API_KEY not set');
+        }
+      } catch (claudeError) {
+        console.error('Claude fallback error:', claudeError);
+      }
       
-      // Fallback: Generate structured data based on OCR text patterns
-      console.log('🔄 Falling back to pattern-based analysis...');
+      // Final fallback: pattern-based analysis
+      console.log('🔁 Falling back to pattern-based analysis...');
       return this.fallbackPatternAnalysis(ocrText);
     }
+  }
+
+  private async performClaudeAnalysis(ocrText: string): Promise<any> {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return null;
+
+    const url = 'https://api.anthropic.com/v1/messages';
+    const body = {
+      model: 'claude-3-5-sonnet-latest',
+      max_tokens: 4000,
+      temperature: 0.3,
+      system: 'You are an expert process engineer and CAD analyst. Return only valid JSON strictly matching the requested structure.',
+      messages: [
+        {
+          role: 'user',
+          content: AI_ANALYSIS_PROMPT + ocrText
+        }
+      ]
+    } as const;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      throw new Error(`Claude API error: ${res.status} ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    // Anthropic returns content as an array; extract the first text block
+    const text = Array.isArray(data.content) && data.content.length > 0 && data.content[0].type === 'text'
+      ? data.content[0].text
+      : (data.content?.[0]?.text || '');
+
+    if (!text) throw new Error('Claude response missing text content');
+
+    // Parse JSON from Claude output
+    return JSON.parse(text);
   }
 
   private fallbackPatternAnalysis(ocrText: string): any {
