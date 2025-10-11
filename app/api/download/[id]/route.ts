@@ -23,8 +23,17 @@ export async function GET(
     
     try {
       job = await jobStorage.getJob(conversionId);
-    } catch (error) {
+  } catch (error) {
       console.warn('MongoDB unavailable, trying fallback storage:', error);
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          {
+            error: 'Persistent storage unavailable',
+            storageType: 'mongodb'
+          },
+          { status: 503 }
+        );
+      }
       storageType = 'memory';
       job = await fallbackJobStorage.getJob(conversionId);
     }

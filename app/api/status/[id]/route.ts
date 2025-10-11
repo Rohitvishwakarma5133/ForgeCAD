@@ -24,11 +24,24 @@ export async function GET(
       console.log('Available jobs in MongoDB:', availableJobIds);
       console.log('Total jobs in MongoDB:', availableJobIds.length);
       job = await jobStorage.getJob(conversionId);
-    } catch (mongoError) {
+  } catch (mongoError) {
       console.error('MongoDB unavailable, checking fallback storage:', mongoError);
+      // In production, do not fall back to ephemeral memory storage on serverless
+      if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+          {
+            status: 'error',
+            error: 'Persistent storage unavailable',
+            conversionId,
+            filename,
+            storageType: 'mongodb'
+          },
+          { status: 503 }
+        );
+      }
       storageType = 'memory';
       
-      // Try to get job from fallback memory storage
+      // Try to get job from fallback memory storage (non-production only)
       try {
         availableJobIds = await fallbackJobStorage.getAllJobIds();
         console.log('Available jobs in fallback storage:', availableJobIds);

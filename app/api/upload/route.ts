@@ -28,10 +28,14 @@ async function saveJobToStorage(conversionId: string, jobData: any) {
     console.log('✅ Job saved to MongoDB');
     return 'mongodb';
   } catch (error: any) {
-    console.warn('⚠️ MongoDB unavailable, using shared fallback storage:', error.message);
-    // Fallback to shared memory storage
+    console.warn('⚠️ MongoDB unavailable when saving job:', error?.message || error);
+    // In production, do NOT fall back to ephemeral memory storage on serverless
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Persistent storage unavailable');
+    }
+    // Fallback to shared memory storage only in non-production environments
     await fallbackJobStorage.setJob(conversionId, jobData);
-    console.log('✅ Job saved to shared fallback storage');
+    console.log('✅ Job saved to shared fallback storage (non-production)');
     return 'memory';
   }
 }
@@ -130,14 +134,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Upload error:', error);
+    const message = (error as Error)?.message || 'Upload failed';
+    const isStorageError = message.includes('Persistent storage unavailable');
     return NextResponse.json(
       { 
-        error: 'Upload failed', 
-        details: (error as Error).message,
+        error: isStorageError ? 'Persistent storage unavailable' : 'Upload failed', 
+        details: message,
         timestamp: new Date().toISOString()
       },
       { 
-        status: 500,
+        status: isStorageError ? 503 : 500,
         headers: getCORSHeaders()
       }
     );
@@ -167,15 +173,18 @@ export async function OPTIONS() {
   });
 }
 
-// Real OCR + AI analysis processing
+  // Real OCR + AI analysis processing
 async function processInBackground(conversionId: string, file: File, storageType: string) {
   try {
     console.log(`🔧 Starting real OCR + AI analysis for ${conversionId}`);
     
     // Save the uploaded file to disk for processing
-    const uploadDir = 'uploads';
+    // On serverless (Vercel), write to /tmp. Locally, use ./uploads
     const fs = await import('fs');
     const path = await import('path');
+    const defaultLocalDir = 'uploads';
+    const serverlessTmpDir = '/tmp/uploads';
+    const uploadDir = process.env.UPLOAD_DIR || (process.env.VERCEL ? serverlessTmpDir : defaultLocalDir);
     
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
