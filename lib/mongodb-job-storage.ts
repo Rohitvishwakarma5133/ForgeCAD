@@ -2,10 +2,13 @@ import { connectToMongoDB } from './mongodb';
 import ProcessingJob, { IProcessingJob } from './models/ProcessingJob';
 
 export interface ProcessingJobData {
+  // Optional conversionId to allow callers to include it in updates; the method also receives it separately
+  conversionId?: string;
   status: 'processing' | 'completed' | 'failed';
   progress: number;
   message: string;
-  filename: string;
+  // Make filename optional to support partial progress updates that don't carry filename
+  filename?: string;
   startTime: number;
   result?: any;
   error?: string;
@@ -41,7 +44,7 @@ class MongoDBJobStorage {
   /**
    * Set/Update a job in MongoDB
    */
-  async setJob(conversionId: string, job: ProcessingJobData): Promise<void> {
+async setJob(conversionId: string, job: Partial<ProcessingJobData>): Promise<void> {
     try {
       await this.ensureConnection();
       

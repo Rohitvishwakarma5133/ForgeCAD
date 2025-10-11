@@ -5,10 +5,11 @@
  */
 
 export interface ProcessingJobData {
+  conversionId?: string;
   status: 'processing' | 'completed' | 'failed';
   progress: number;
   message: string;
-  filename: string;
+  filename?: string;
   startTime: number;
   result?: any;
   error?: string;
@@ -33,8 +34,11 @@ class FallbackJobStorage {
   /**
    * Set/Update a job in memory storage
    */
-  setJob(conversionId: string, job: ProcessingJobData): Promise<void> {
-    this.storage.set(conversionId, { ...job });
+setJob(conversionId: string, job: Partial<ProcessingJobData>): Promise<void> {
+    // Merge with existing job to support partial updates while preserving required fields
+    const existing = this.storage.get(conversionId) ?? ({} as ProcessingJobData);
+    const merged = { ...existing, ...job } as ProcessingJobData;
+    this.storage.set(conversionId, merged);
     console.log(`💾 Job saved to memory storage: ${conversionId}`);
     return Promise.resolve();
   }
