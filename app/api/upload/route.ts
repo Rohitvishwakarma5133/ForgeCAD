@@ -29,14 +29,18 @@ async function saveJobToStorage(conversionId: string, jobData: any) {
     return 'mongodb';
   } catch (error: any) {
     console.warn('⚠️ MongoDB unavailable when saving job:', error?.message || error);
-    // In production, do NOT fall back to ephemeral memory storage on serverless
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Persistent storage unavailable');
+    // In production, fall back to file-based storage under /tmp (serverless-friendly)
+    try {
+      const { jobStorage } = await import('@/lib/job-storage');
+      await Promise.resolve(jobStorage.setJob(conversionId, jobData));
+      console.log('✅ Job saved to file-based storage');
+      return 'file';
+    } catch (fileErr) {
+      console.warn('⚠️ File-based storage unavailable, using shared memory storage as last resort:', (fileErr as Error).message);
+      await fallbackJobStorage.setJob(conversionId, jobData);
+      console.log('✅ Job saved to shared fallback storage');
+      return 'memory';
     }
-    // Fallback to shared memory storage only in non-production environments
-    await fallbackJobStorage.setJob(conversionId, jobData);
-    console.log('✅ Job saved to shared fallback storage (non-production)');
-    return 'memory';
   }
 }
 
@@ -260,9 +264,20 @@ async function processInBackground(conversionId: string, file: File, storageType
         await mongoJobStorage.setJob(conversionId, completedJob);
         console.log(`💾 Analysis results stored in MongoDB for ${conversionId}`);
       } catch (error) {
-        console.error('Failed to store in MongoDB, using fallback:', error);
-        await fallbackJobStorage.setJob(conversionId, completedJob);
+        console.error('Failed to store in MongoDB, attempting file-based storage:', error);
+        try {
+          const { jobStorage } = await import('@/lib/job-storage');
+          await Promise.resolve(jobStorage.setJob(conversionId, completedJob));
+          console.log(`💾 Analysis results stored in file-based storage for ${conversionId}`);
+        } catch (fileErr) {
+          console.error('File-based storage failed, using memory fallback:', fileErr);
+          await fallbackJobStorage.setJob(conversionId, completedJob);
+        }
       }
+    } else if (storageType === 'file') {
+      const { jobStorage } = await import('@/lib/job-storage');
+      await Promise.resolve(jobStorage.setJob(conversionId, completedJob));
+      console.log(`💾 Analysis results stored in file-based storage for ${conversionId}`);
     } else {
       await fallbackJobStorage.setJob(conversionId, completedJob);
       console.log(`💾 Analysis results stored in fallback storage for ${conversionId}`);
@@ -335,8 +350,16 @@ async function updateJobProgress(conversionId: string, storageType: string, upda
       const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
       await mongoJobStorage.setJob(conversionId, updatedJob);
     } catch (error) {
-      await fallbackJobStorage.setJob(conversionId, updatedJob);
+      try {
+        const { jobStorage } = await import('@/lib/job-storage');
+        await Promise.resolve(jobStorage.setJob(conversionId, updatedJob));
+      } catch {
+        await fallbackJobStorage.setJob(conversionId, updatedJob);
+      }
     }
+  } else if (storageType === 'file') {
+    const { jobStorage } = await import('@/lib/job-storage');
+    await Promise.resolve(jobStorage.setJob(conversionId, updatedJob));
   } else {
     await fallbackJobStorage.setJob(conversionId, updatedJob);
   }

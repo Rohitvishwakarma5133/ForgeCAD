@@ -25,17 +25,18 @@ export async function GET(
       job = await jobStorage.getJob(conversionId);
   } catch (error) {
       console.warn('MongoDB unavailable, trying fallback storage:', error);
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json(
-          {
-            error: 'Persistent storage unavailable',
-            storageType: 'mongodb'
-          },
-          { status: 503 }
-        );
+      try {
+        const { jobStorage } = await import('@/lib/job-storage');
+        job = jobStorage.getJob(conversionId) as any;
+        storageType = job ? 'file' : 'memory';
+        if (!job) {
+          job = await fallbackJobStorage.getJob(conversionId);
+        }
+      } catch (fsErr) {
+        console.warn('File-based storage unavailable, using memory fallback:', fsErr);
+        storageType = 'memory';
+        job = await fallbackJobStorage.getJob(conversionId);
       }
-      storageType = 'memory';
-      job = await fallbackJobStorage.getJob(conversionId);
     }
     
     if (!job || job.status !== 'completed' || !job.result) {

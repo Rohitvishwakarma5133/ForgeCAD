@@ -24,32 +24,37 @@ export async function GET(
       console.log('Available jobs in MongoDB:', availableJobIds);
       console.log('Total jobs in MongoDB:', availableJobIds.length);
       job = await jobStorage.getJob(conversionId);
-  } catch (mongoError) {
+    } catch (mongoError) {
       console.error('MongoDB unavailable, checking fallback storage:', mongoError);
-      // In production, do not fall back to ephemeral memory storage on serverless
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json(
-          {
-            status: 'error',
-            error: 'Persistent storage unavailable',
-            conversionId,
-            filename,
-            storageType: 'mongodb'
-          },
-          { status: 503 }
-        );
-      }
-      storageType = 'memory';
-      
-      // Try to get job from fallback memory storage (non-production only)
+      // Try file-based storage on serverless
       try {
-        availableJobIds = await fallbackJobStorage.getAllJobIds();
-        console.log('Available jobs in fallback storage:', availableJobIds);
-        console.log('Total jobs in fallback storage:', availableJobIds.length);
-        job = await fallbackJobStorage.getJob(conversionId);
-        console.log('Job found in fallback storage:', !!job);
-      } catch (memoryError) {
-        console.error('Fallback storage also unavailable:', memoryError);
+        const { jobStorage } = await import('@/lib/job-storage');
+        const ids = jobStorage.getAllJobIds();
+        availableJobIds = Array.isArray(ids) ? ids : await Promise.resolve(ids);
+        console.log('Available jobs in file-based storage:', availableJobIds);
+        job = jobStorage.getJob(conversionId) as any;
+        if (!job) {
+          // Fall back to memory storage as a last resort (may not persist across invocations)
+          storageType = 'memory';
+          availableJobIds = await fallbackJobStorage.getAllJobIds();
+          job = await fallbackJobStorage.getJob(conversionId);
+        } else {
+          storageType = 'file';
+        }
+      } catch (fsErr) {
+        console.error('File-based storage unavailable:', fsErr);
+        storageType = 'memory';
+        
+        // Try to get job from fallback memory storage
+        try {
+          availableJobIds = await fallbackJobStorage.getAllJobIds();
+          console.log('Available jobs in fallback storage:', availableJobIds);
+          console.log('Total jobs in fallback storage:', availableJobIds.length);
+          job = await fallbackJobStorage.getJob(conversionId);
+          console.log('Job found in fallback storage:', !!job);
+        } catch (memoryError) {
+          console.error('Fallback storage also unavailable:', memoryError);
+        }
       }
     }
     

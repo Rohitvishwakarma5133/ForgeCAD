@@ -31,7 +31,10 @@ class JobStorage {
   private jobsDir: string;
 
   constructor() {
-    this.jobsDir = path.join(process.cwd(), 'job-storage');
+    const defaultLocalDir = path.join(process.cwd(), 'job-storage');
+    const serverlessTmpDir = '/tmp/job-storage';
+    const configuredDir = process.env.JOB_STORAGE_DIR;
+    this.jobsDir = configuredDir || (process.env.VERCEL ? serverlessTmpDir : defaultLocalDir);
     this.ensureJobsDirectory();
   }
 
