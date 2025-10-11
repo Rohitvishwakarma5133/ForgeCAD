@@ -21,26 +21,34 @@ function getCORSHeaders() {
 import { fallbackJobStorage } from '@/lib/fallback-job-storage';
 
 async function saveJobToStorage(conversionId: string, jobData: any) {
-  try {
-    // Try MongoDB first (will fail if unavailable)
-    const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
-    await mongoJobStorage.setJob(conversionId, jobData);
-    console.log('✅ Job saved to MongoDB');
-    return 'mongodb';
-  } catch (error: any) {
-    console.warn('⚠️ MongoDB unavailable when saving job:', error?.message || error);
-    // In production, fall back to file-based storage under /tmp (serverless-friendly)
+  // Try MongoDB with quick retries to avoid cold-start races in serverless
+  const mongoAttempts = Number(process.env.MONGO_SAVE_ATTEMPTS || 3);
+  const mongoDelayMs = Number(process.env.MONGO_SAVE_RETRY_MS || 300);
+  for (let i = 0; i < mongoAttempts; i++) {
     try {
-      const { jobStorage } = await import('@/lib/job-storage');
-      await Promise.resolve(jobStorage.setJob(conversionId, jobData));
-      console.log('✅ Job saved to file-based storage');
-      return 'file';
-    } catch (fileErr) {
-      console.warn('⚠️ File-based storage unavailable, using shared memory storage as last resort:', (fileErr as Error).message);
-      await fallbackJobStorage.setJob(conversionId, jobData);
-      console.log('✅ Job saved to shared fallback storage');
-      return 'memory';
+      const { mongoJobStorage } = await import('@/lib/mongodb-job-storage');
+      await mongoJobStorage.setJob(conversionId, jobData);
+      console.log(`✅ Job saved to MongoDB (attempt ${i + 1}/${mongoAttempts})`);
+      return 'mongodb';
+    } catch (err: any) {
+      console.warn(`⚠️ Mongo save attempt ${i + 1} failed:`, err?.message || err);
+      if (i < mongoAttempts - 1) {
+        await new Promise(r => setTimeout(r, mongoDelayMs));
+      }
     }
+  }
+
+  // Fall back to file-based storage under /tmp (serverless-friendly)
+  try {
+    const { jobStorage } = await import('@/lib/job-storage');
+    await Promise.resolve(jobStorage.setJob(conversionId, jobData));
+    console.log('✅ Job saved to file-based storage');
+    return 'file';
+  } catch (fileErr) {
+    console.warn('⚠️ File-based storage unavailable, using shared memory storage as last resort:', (fileErr as Error).message);
+    await fallbackJobStorage.setJob(conversionId, jobData);
+    console.log('✅ Job saved to shared fallback storage');
+    return 'memory';
   }
 }
 
