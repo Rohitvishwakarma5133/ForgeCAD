@@ -8,12 +8,5 @@
       "maxDuration": 60
     }
   },
-  "regions": ["iad1"],
-  "redirects": [
-    {
-      "source": "/demo",
-      "destination": "/converter",
-      "permanent": false
-    }
-  ]
+  "regions": ["iad1"]
 }

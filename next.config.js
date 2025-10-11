@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Ensure URL slash behavior matches Vercel setting to avoid redirect loops
+  trailingSlash: false,
   
   // Image optimization configuration
   images: {
