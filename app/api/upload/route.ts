@@ -192,7 +192,8 @@ async function processInBackground(conversionId: string, file: File, storageType
       progress: 10,
       stage: 'OCR Processing',
       message: 'Starting OCR text extraction...',
-      status: 'processing'
+      status: 'processing',
+      filename: file.name
     });
     
     // Initialize the real OCR + AI analysis service
@@ -204,7 +205,8 @@ async function processInBackground(conversionId: string, file: File, storageType
       progress: 50,
       stage: 'AI Analysis',
       message: 'Sending data to ChatGPT for analysis and structuring...',
-      status: 'processing'
+      status: 'processing',
+      filename: file.name
     });
     
     // Perform real analysis using OCR + ChatGPT
@@ -215,7 +217,8 @@ async function processInBackground(conversionId: string, file: File, storageType
       progress: 85,
       stage: 'Data Storage',
       message: 'Storing structured data in MongoDB...',
-      status: 'processing'
+      status: 'processing',
+      filename: file.name
     });
     
     // Complete the job with the analysis results
@@ -301,9 +304,11 @@ async function updateJobProgress(conversionId: string, storageType: string, upda
   stage: string;
   message: string;
   status: 'processing' | 'completed' | 'failed';
+  filename?: string;
 }) {
   const updatedJob = {
     conversionId,
+    filename: update.filename || 'unknown',
     status: update.status,
     progress: update.progress,
     message: `[${update.stage}] ${update.message}`,
