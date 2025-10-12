@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { Plus, Search, Filter, Grid, List, FolderPlus, RefreshCw, AlertTriangle 
 import { Project } from '@/types';
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -51,8 +53,8 @@ export default function ProjectsPage() {
   const filteredProjects = projects;
 
   const handleProjectView = (project: Project) => {
-    // Navigate to project detail page
-    window.location.href = `/dashboard/projects/${project.id}`;
+    // Navigate to project detail page without full reload
+    router.push(`/dashboard/projects/${project.id}`);
   };
 
   const handleProjectDelete = async (project: Project) => {

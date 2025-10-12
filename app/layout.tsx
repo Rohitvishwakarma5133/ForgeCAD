@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { ClerkProvider } from '@clerk/nextjs';
+import ClientProviders from '@/components/ClientProviders';
 import SessionTracker from '@/components/SessionTracker';
 import HideClerkDevNotices from '@/components/HideClerkDevNotices';
 import LoadingOptimizer from '@/components/LoadingOptimizer';
@@ -34,18 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        elements: {
-          // Hide development mode warnings
-          developerNotice: 'hidden'
-        },
-        // Optimize loading performance
-        layout: {
-          unsafe_disableDevelopmentModeWarnings: true
-        }
-      }}
-    >
+    <ClientProviders>
       <html lang="en" suppressHydrationWarning>
         <head>
           <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
@@ -62,6 +51,6 @@ export default function RootLayout({
           </div>
         </body>
       </html>
-    </ClerkProvider>
+    </ClientProviders>
   );
 }

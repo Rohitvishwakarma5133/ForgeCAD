@@ -11,6 +11,7 @@ import {
   CheckCircle, AlertTriangle, Zap, Users, RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
+import CreditMeter from '@/components/CreditMeter';
 
 interface DashboardData {
   stats: {
@@ -134,29 +135,12 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
-          <p className="text-gray-600 mt-1">
-            Here&apos;s what&apos;s happening with your drawings today.
-          </p>
+      {/* Credit meter at top-center */}
+      <section className="mt-2 flex justify-center">
+        <div className="rounded-2xl bg-white/70 dark:bg-zinc-900/60 border border-gray-200 dark:border-gray-800 p-4 w-full max-w-2xl mx-auto">
+          <CreditMeter totalCredits={usage.planLimit} usedCredits={usage.thisMonth} />
         </div>
-        <div className="flex gap-3">
-          <Link href="/dashboard/upload">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Upload Drawing
-            </Button>
-          </Link>
-          <Link href="/dashboard/projects">
-            <Button variant="outline">
-              <FolderOpen className="w-4 h-4 mr-2" />
-              View Projects
-            </Button>
-          </Link>
-        </div>
-      </div>
+      </section>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
